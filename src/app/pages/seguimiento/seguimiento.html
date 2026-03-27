@@ -1,0 +1,44 @@
+<div class="seguimiento-container">
+  <ng-container *ngIf="envio; else noData">
+    <mat-card class="seguimiento-card">
+      <div class="seguimiento-header">
+        <div>
+          <h2>Número de seguimiento</h2>
+          <h3>{{ envio.nroSeguimiento }}</h3>
+        </div>
+        <div class="entrega-estimada">
+          <p>Entrega estimada</p>
+          <h3 class="fecha-entrega">
+            Llega entre las {{ '2000-01-01T' + envio.horaEntregaDesde | date:'HH:mm' }}
+            y las {{ '2000-01-01T' + envio.horaEntregaHasta | date:'HH:mm' }}
+          </h3>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <div *ngFor="let evento of envio.eventos; let i = index"
+             class="timeline-item"
+             [ngClass]="{ 'activo': evento.estado === envio.estadoActual, 'completado': i < estadoActualIndex }">
+          <div class="timeline-icon">
+            <mat-icon *ngIf="evento.estado === 'Entregado'">home</mat-icon>
+            <mat-icon *ngIf="evento.estado === 'En reparto'">location_on</mat-icon>
+            <mat-icon *ngIf="evento.estado === 'En camino'">local_shipping</mat-icon>
+            <mat-icon *ngIf="evento.estado === 'Pedido confirmado'">check_circle</mat-icon>
+            <mat-icon *ngIf="!evento.estado">circle</mat-icon>
+          </div>
+          <div class="timeline-content">
+            <h4>{{ evento.estado }}</h4>
+            <p class="fecha">{{ evento.fechaHora | date:'dd/MM/yyyy, HH:mm' }}</p>
+            <p>{{ evento.observacion }}</p>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </ng-container>
+
+  <ng-template #noData>
+    <mat-card class="seguimiento-card">
+      <p style="text-align:center; margin: 0;">No hay datos para mostrar.</p>
+    </mat-card>
+  </ng-template>
+</div>

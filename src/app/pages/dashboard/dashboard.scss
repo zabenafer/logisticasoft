@@ -1,0 +1,90 @@
+.dashboard-container {
+  display: flex;
+  height: 100dvh;
+  background-color: #f5f7fa;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.dashboard-container, .dashboard-container .content{
+  height: 100%;
+  overflow: visible; /* que no agregue otro scroll */
+}
+/* Sidebar base */
+app-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+}
+.dashboard-container.collapsed app-sidebar { width: 70px; }
+
+/* Contenido */
+.content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  transition: all 0.3s ease;
+}
+.dashboard-container.collapsed .content { padding-left: 10px; }
+
+/* ======= SOLO MOBILE ======= */
+@media (max-width: 768px) {
+  .dashboard-container {
+    display: flex;
+    flex-direction: row;
+    height: 100dvh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Sidebar fijo */
+  app-sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 220px; /* tu ancho real del sidebar abierto (300px visual) es para el empuje del contenido */
+    height: calc(100dvh - 56px);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  /* Contenido */
+  .content {
+    width: 100%;
+    padding: 15px;
+    /* Animamos ambas propiedades porque en abierto usamos transform y
+       en cerrado usamos margin-left */
+    transition: transform 0.3s ease, margin-left 0.3s ease;
+  }
+
+  /* 📂 MENÚ ABIERTO: desplaza SIN achicar (como querías) */
+  .dashboard-container:not(.collapsed) .content {
+    transform: translateX(300px);  /* <-- tu valor de empuje abierto */
+    margin-left: 0;                /* aseguramos que no quede margen */
+  }
+
+  /* 📁 MENÚ CERRADO: NO desplazamos con transform, usamos margen */
+  .dashboard-container.collapsed .content {
+    transform: none;               /* <-- clave: nada de translate */
+    margin-left: 70px;             /* <-- ancho del sidebar colapsado */
+  }
+
+  /* Overlay solo a la derecha del menú abierto (no tapa el menú) */
+  .overlay {
+    position: fixed;
+    top: 56px;
+    left: 300px;                   /* empieza después del sidebar abierto */
+    width: calc(100% - 300px);
+    height: calc(100dvh - 56px);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(1px);
+    z-index: 900;                  /* debajo del sidebar */
+    opacity: 0;
+    animation: fadeIn 0.2s forwards ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+}
+

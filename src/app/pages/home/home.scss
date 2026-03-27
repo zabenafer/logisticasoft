@@ -1,0 +1,17 @@
+.home-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+mat-card {
+  width: 400px;
+  padding: 1rem;
+}
+
+.titulo-seguimiento {
+  font-size: 2em; /* O el tamaño que prefieras, por ejemplo, 32px */
+  font-weight: bold; /* Opcional: para que se vea más grueso */
+  color: #3f51b5; /* Opcional: para cambiar el color */
+}

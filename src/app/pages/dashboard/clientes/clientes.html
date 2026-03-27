@@ -1,0 +1,125 @@
+<div class="clientes-container" [attr.aria-busy]="isLoading">
+  <div class="header">
+    <h2>CLIENTES</h2>
+    <button mat-raised-button class="btn-nuevo-cliente" (click)="agregarCliente()" aria-label="Agregar nuevo cliente">
+      <mat-icon>person_add</mat-icon>
+      <span>Nuevo Cliente</span>
+    </button>
+  </div>
+
+  <mat-card class="clientes-card">
+
+    <!-- Filtro -->
+    <div class="filtro-container">
+      <mat-form-field appearance="outline" class="filtro">
+        <mat-label>Buscar cliente</mat-label>
+        <input matInput placeholder="Nombre o Apellido" [(ngModel)]="filtro" (keyup)="aplicarFiltro()" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+    <!-- Desktop -->
+    <div class="tabla-scroll" *ngIf="!isMobile">
+      <table mat-table [dataSource]="dataSource" class="clientes-table" matSort>
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+          <td mat-cell *matCellDef="let c">{{ c.nombre }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="apellido">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Apellido</th>
+          <td mat-cell *matCellDef="let c">{{ c.apellido }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="direccion">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Dirección</th>
+          <td mat-cell *matCellDef="let c">{{ c.direccion }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="localidad">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Localidad</th>
+          <td mat-cell *matCellDef="let c">{{ c.localidad }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="provincia">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Provincia</th>
+          <td mat-cell *matCellDef="let c">{{ c.provincia }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Celular</th>
+          <td mat-cell *matCellDef="let c">{{ c.telefono }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Acciones</th>
+          <td mat-cell *matCellDef="let c" class="acciones-cell">
+            <button mat-icon-button color="primary" (click)="verHistorial(c)">
+              <mat-icon>history</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" (click)="editarCliente(c)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminarCliente(c)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mobile -->
+    <div class="clientes-list" *ngIf="isMobile">
+      <div class="cliente-card" *ngFor="let c of dataSource.data; trackBy: trackById">
+        <div class="avatar" [ngStyle]="{ 'background-color': getAvatarColor(c.nombre) }">
+          {{ getInicial(c.nombre) }}
+        </div>
+
+        <div class="info">
+          <h3>{{ c.nombre }} {{ c.apellido }}</h3>
+          <p class="detalle">{{ c.direccion }} - {{ c.localidad }}</p>
+          <p class="detalle">{{ c.provincia }} | {{ c.telefono }}</p>
+        </div>
+
+        <div class="acciones">
+          <button mat-icon-button color="accent" (click)="editarCliente(c)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="eliminarCliente(c)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <mat-paginator
+      class="paginator-min"
+      [length]="dataSource.data.length"
+      [pageSize]="25"
+      [hidePageSize]="true"
+      [showFirstLastButtons]="false"
+      (page)="onPage($event)">      
+    </mat-paginator>
+    <div class="page-chip">{{ pageIndex + 1 }} / {{ totalPages }}</div>
+  </mat-card>
+</div>
+
+  <ng-template #confirmTpl let-data>
+    <h2 mat-dialog-title>Eliminar cliente</h2>
+    <mat-dialog-content>¿Querés eliminar a <b>{{data.nombre}} {{data.apellido}}</b>?</mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Cancelar</button>
+      <button mat-flat-button color="warn" [mat-dialog-close]="true">Eliminar</button>
+    </mat-dialog-actions>
+  </ng-template>
+
+  <!-- overlay de carga -->
+  <div class="loading-backdrop" *ngIf="isLoading" role="status" aria-live="polite">
+    <div class="loading-panel">
+      <mat-progress-spinner mode="indeterminate" [diameter]="56"></mat-progress-spinner>
+      <span>Cargando envíos…</span>
+    </div>
+  </div>
+

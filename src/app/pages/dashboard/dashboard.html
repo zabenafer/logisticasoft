@@ -1,0 +1,15 @@
+<div class="dashboard-container" [class.collapsed]="sidebarCollapsed">
+  <!-- Pasamos el estado al hijo -->
+  <app-sidebar
+    [collapsed]="sidebarCollapsed"
+    (toggle)="toggleSidebar($event)"
+    (itemSelected)="closeSidebar()"
+  ></app-sidebar>
+
+  <!-- Overlay solo cuando está ABIERTO y solo a la derecha del sidebar -->
+  <div class="overlay" *ngIf="!sidebarCollapsed" (click)="closeSidebar()"></div>
+
+  <div class="content">
+    <router-outlet></router-outlet>
+  </div>
+</div>

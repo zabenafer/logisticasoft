@@ -1,0 +1,83 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.logo {
+  font-weight: 600;
+  color: #ffffff !important;
+  letter-spacing: 0.4px;
+  font-family: "Inter", "Roboto", "Segoe UI", Arial, sans-serif;
+  text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.4);
+  transition: color 0.2s ease;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  backface-visibility: hidden;
+}
+
+/* 🔹 Botones Angular Material con subrayado centrado elegante */
+button.mat-mdc-button,
+button.mat-mdc-button .mdc-button__label {
+  color: #ffffff !important;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  position: relative;
+  -webkit-font-smoothing: subpixel-antialiased;
+  text-rendering: geometricPrecision;
+  transition: color 0.2s ease;
+  overflow: hidden;
+}
+
+/* ✨ Subrayado centrado */
+button.mat-mdc-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background-color: #ffffff;
+  transition: width 0.25s ease-in-out;
+  border-radius: 2px;
+}
+
+/* 🔹 Hover: se anima desde el centro */
+button.mat-mdc-button:hover::after {
+  width: 80%; /* subrayado centrado, 60% del ancho del texto */
+}
+
+/* Color más claro al hover (sin blur) */
+button.mat-mdc-button:hover .mdc-button__label {
+  color: #f5f5f5 !important;
+}
+
+/* 🔹 Navbar fijo, limpio y nítido */
+.navbar {
+  background-color: #1e3a5f;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  color: #ffffff;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  z-index: 1500;
+
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  backface-visibility: hidden;
+}
+
+/* 🔹 Toolbar sin sombras ni fondo adicional */
+mat-toolbar {
+  background: transparent;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #ffffff !important;
+  box-shadow: none;
+}

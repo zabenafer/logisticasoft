@@ -1,0 +1,36 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>Bienvenido de Nuevo</h2>
+    <p class="subtitle">Inicia sesión para gestionar tus envíos.</p>
+
+    <form (ngSubmit)="onLogin()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Usuario o Email</mat-label>
+        <input matInput [(ngModel)]="usuario" name="usuario" required
+              autocomplete="username" autocapitalize="none" spellcheck="false"/>
+        <mat-icon matPrefix>person</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña</mat-label>
+        <input matInput [(ngModel)]="password" name="password" type="password" required
+              autocomplete="current-password"/>
+        <mat-icon matPrefix>lock</mat-icon>
+      </mat-form-field>
+
+      <!-- fila de opciones: checkbox a la izquierda / link a la derecha -->
+      <div class="options">
+        <mat-checkbox class="remember" [(ngModel)]="recordarme" name="recordarme">
+          Recordarme
+        </mat-checkbox>
+
+        <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <!-- Mejor usar flat button con color Material (texto más nítido) -->
+      <button mat-flat-button type="submit" class="login-button">
+        Iniciar Sesión
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,111 @@
+<div class="envios-container" [attr.aria-busy]="isLoading">
+  <div class="header">
+    <h2>ENVÍOS</h2>
+    <button mat-raised-button color="primary" class="btn-nuevo-envio" (click)="crear()">
+      <mat-icon>local_shipping</mat-icon><span>Nuevo Envío</span>
+    </button>
+  </div>
+
+  <mat-card class="envios-card">
+    <div class="filtro-container">
+      <mat-form-field appearance="outline" class="filtro">
+        <mat-label>Buscar</mat-label>
+        <input matInput [(ngModel)]="filtro" (keyup)="aplicarFiltro()" placeholder="Nro, cliente, estado, origen/destino">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+    <!-- Desktop -->
+    <div class="tabla-scroll">
+      <table mat-table [dataSource]="dataSource" matSort class="envios-table only-desktop">
+        <ng-container matColumnDef="nroSeguimiento">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nro</th>
+          <td mat-cell *matCellDef="let e">{{ e.nroSeguimiento }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cliente">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+          <td mat-cell *matCellDef="let e">{{ e.clienteNombre }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="origen">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Origen</th>
+          <td mat-cell *matCellDef="let e">{{ e.localidadOrigen }} | {{ e.direccionOrigen }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="destino">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Destino</th>
+          <td mat-cell *matCellDef="let e">{{ e.localidadDestino }} | {{ e.direccionDestino }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+          <td mat-cell *matCellDef="let e">
+            <span class="chip" [class.ok]="e.estadoActual === 'Entregado'"
+                               [class.eliminado]="e.estadoActual === 'Eliminado'"
+                               [class.cancelado]="e.estadoActual === 'Cancelado'">{{ e.estadoActual }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="creado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
+          <td mat-cell *matCellDef="let e">{{ e.fechaCreacion | date:'short' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let e" class="acciones-cell">
+            <button mat-icon-button (click)="editar(e)"><mat-icon>edit</mat-icon></button>
+            <button mat-icon-button color="warn" (click)="eliminar(e)"><mat-icon>delete</mat-icon></button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <div class="mobile-list only-mobile">
+      <mat-card class="envio-card" *ngFor="let e of dataSource.filteredData; trackBy: trackById">
+        <div class="top">
+          <strong class="nro">{{ e.nroSeguimiento }}</strong>
+          <span class="estado" [class.ok]="e.estadoActual==='Entregado'"
+                               [class.eliminado]="e.estadoActual === 'Eliminado'"
+                               [class.cancelado]="e.estadoActual === 'Cancelado'">{{ e.estadoActual }}</span>
+        </div>
+        <div class="cliente">{{ e.clienteNombre }}</div>
+        <div class="ruta">
+          <mat-icon>place</mat-icon>
+          {{ e.localidadOrigen }} → {{ e.localidadDestino }}
+        </div>
+        <div class="dirs">
+          <div>{{ e.direccionOrigen }}</div>
+          <div>{{ e.direccionDestino }}</div>
+        </div>
+        <div class="acciones">
+          <button mat-icon-button (click)="editar(e)"><mat-icon>edit</mat-icon></button>
+          <button mat-icon-button color="warn" (click)="eliminar(e)"><mat-icon>delete</mat-icon></button>
+        </div>
+      </mat-card>
+    </div>
+    
+
+    <mat-paginator class="paginator-min" [pageSize]="25" [hidePageSize]="true"></mat-paginator>
+  </mat-card>
+
+  <ng-template #confirmTpl let-data>
+    <h2 mat-dialog-title>Eliminar Envio</h2>
+    <mat-dialog-content>¿Querés eliminar el envio <b>Nro {{data.nroSeguimiento}}</b> <b> Cliente {{data.clienteNombre}}? </b></mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Cancelar</button>
+      <button mat-flat-button color="warn" [mat-dialog-close]="true">Eliminar</button>
+    </mat-dialog-actions>
+  </ng-template>
+
+    <!-- overlay de carga -->
+  <div class="loading-backdrop" *ngIf="isLoading" role="status" aria-live="polite">
+    <div class="loading-panel">
+      <mat-progress-spinner mode="indeterminate" [diameter]="56"></mat-progress-spinner>
+      <span>{{ loadingMsg }}</span>
+    </div>
+  </div>
+</div>

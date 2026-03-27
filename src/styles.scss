@@ -1,1 +1,71 @@
-/* You can add global styles to this file, and also import other style files */
+
+@use '@angular/material' as mat;
+
+:root {
+  --app-toolbar-h: 64px;   /* header */
+  --app-footer-h: 56px;    /* footer */
+}
+@media (max-width: 599px) {
+  :root {
+    --app-toolbar-h: 56px;
+    --app-footer-h: 56px;
+  }
+}
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+}
+
+html, body { height: 100%; overflow: hidden; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Estilo del panel del diálogo */
+.dlg-cliente .mat-mdc-dialog-surface,
+.dlg-cliente .mdc-dialog__surface { /* compat */
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.18);
+}
+
+/* Opcional: fondo más claro del contenido */
+.dlg-cliente .mat-mdc-dialog-content {
+  background: #f7f7fb; /* leve */
+}
+
+/* Ajuste del título */
+.dlg-cliente .mat-mdc-dialog-title {
+  padding: 16px 20px 8px;
+  font-weight: 600;
+}
+
+/* si ya tenés `.navbar-fixed` dejalo igual */
+.navbar-fixed { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+.app-main {
+  overflow: auto;
+  
+  
+  padding-top: var(--app-toolbar-h);
+  padding-bottom: calc(var(--app-footer-h) + 16px);
+  min-height: calc(100dvh - var(--app-toolbar-h) - var(--app-footer-h));
+   /* cuando hacés scroll hasta el final por teclado/anchors, deja aire */
+  scroll-padding-bottom: calc(var(--app-footer-h) + 16px);
+  display: flow-root;
+}
+/* si alguna vista (p.ej. login) no usa header */
+.app-main.no-offset { padding-top: 0; }
+/* si alguna vista no quiere footer: */
+.app-main.no-footer { padding-bottom: 0; min-height: calc(100dvh - var(--app-toolbar-h)); }

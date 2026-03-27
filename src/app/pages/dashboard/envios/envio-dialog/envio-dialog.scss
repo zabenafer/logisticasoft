@@ -1,0 +1,36 @@
+.form {
+  display: grid;
+  gap: 12px;
+  width: 520px;
+  max-width: 92vw;
+}
+
+/* contenedor scrollable */
+.content {
+  padding: 12px 16px 0; /* 👈 antes estaba 0 16px; agregamos top 12px */
+}
+
+/* grid de formulario */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px; /* 👈 un poco de margen arriba */
+}
+
+/* campos que ocupan todo el ancho */
+.full {
+  grid-column: 1 / -1;
+}
+
+/* acciones abajo, separadas visualmente */
+.actions {
+  padding: 8px 16px 16px;
+}
+
+/* responsive: en mobile, 1 columna */
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

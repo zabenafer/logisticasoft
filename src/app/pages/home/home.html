@@ -1,0 +1,18 @@
+<div class="home-container">
+  <mat-card>
+    <mat-card-title class="titulo-seguimiento">Seguí tu envío ahora</mat-card-title>
+    <p>Conocé el estado de tus envíos en todo momento.</p>
+    <p></p>
+    <mat-card-content>
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Nro de seguimiento</mat-label>
+        <input matInput [(ngModel)]="trackingNumber">
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-raised-button color="primary" (click)="buscarEnvio()">
+        Buscar
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

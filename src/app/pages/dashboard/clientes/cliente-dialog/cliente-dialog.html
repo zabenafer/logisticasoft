@@ -1,0 +1,112 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
+
+<mat-dialog-content class="content">
+  <form [formGroup]="form" class="grid" autocomplete="off">
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <mat-icon matPrefix>person</mat-icon>
+      <input matInput formControlName="nombre" required cdkFocusInitial>
+      <mat-error *ngIf="form.controls.nombre.touched && form.controls.nombre.hasError('required')">
+        Requerido
+      </mat-error>
+      <mat-error *ngIf="form.controls.nombre.hasError('maxlength')">
+        Máx. 60 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Apellido</mat-label>
+      <mat-icon matPrefix>badge</mat-icon>
+      <input matInput formControlName="apellido" required>
+      <mat-error *ngIf="form.controls.apellido.touched && form.controls.apellido.hasError('required')">
+        Requerido
+      </mat-error>
+      <mat-error *ngIf="form.controls.apellido.hasError('maxlength')">
+        Máx. 60 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Email</mat-label>
+      <mat-icon matPrefix>mail</mat-icon>
+      <input matInput formControlName="email" type="email" placeholder="nombre@dominio.com">
+      <mat-error *ngIf="form.controls.email.touched && form.controls.email.hasError('email')">
+        Email inválido
+      </mat-error>
+      <mat-error *ngIf="form.controls.email.hasError('maxlength')">
+        Máx. 120 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono</mat-label>
+      <mat-icon matPrefix>call</mat-icon>
+      <input matInput formControlName="telefono" placeholder="351..."
+             inputmode="tel">
+      <mat-error *ngIf="form.controls.telefono.hasError('maxlength')">
+        Máx. 30 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Dirección</mat-label>
+      <mat-icon matPrefix>home</mat-icon>
+      <input matInput formControlName="direccion">
+      <mat-error *ngIf="form.controls.direccion.hasError('maxlength')">
+        Máx. 120 caracteres
+      </mat-error>
+    </mat-form-field>
+
+  <!-- Provincia -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Provincia</mat-label>
+      <mat-icon matPrefix>map</mat-icon>
+      <mat-select formControlName="provinciaId">
+        <mat-option [value]="null">Todas</mat-option>
+        <mat-option *ngFor="let p of provincias" [value]="p.id">
+          {{ p.nombre }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Localidad (autocomplete con carga remota) -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Localidad</mat-label>
+      <mat-icon matPrefix>location_city</mat-icon>
+
+      <input
+        type="text"
+        matInput
+        [matAutocomplete]="autoLoc"
+        [formControl]="localidadQueryCtrl"
+        placeholder="Escribí 2+ letras para buscar"
+      />
+
+      <button mat-icon-button matSuffix disabled *ngIf="localidadesLoading()">
+        <mat-progress-spinner mode="indeterminate" diameter="18"></mat-progress-spinner>
+      </button>
+
+      <mat-autocomplete #autoLoc="matAutocomplete"
+                        (optionSelected)="onLocalidadSelected($event.option.value)"
+                        [displayWith]="displayLocalidad">
+        <mat-option *ngFor="let l of localidades" [value]="l">
+          {{ l.nombre }} <small *ngIf="l.provincia">— {{ l.provincia }}</small>
+        </mat-option>
+        <mat-option *ngIf="!localidadesLoading() && localidades.length === 0 && queryLength >= 2" disabled>
+          Sin resultados
+        </mat-option>
+      </mat-autocomplete>
+
+      <mat-error *ngIf="form.controls.localidadId.invalid && (form.touched || form.dirty)">
+        Seleccioná una localidad de la lista
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="actions">
+  <button mat-button (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="guardar()" [disabled]="form.invalid">
+    Guardar
+  </button>
+</mat-dialog-actions>

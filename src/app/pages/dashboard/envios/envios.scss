@@ -1,0 +1,450 @@
+
+/* Altura de toda la vista = pantalla - header - footer */
+:host {
+  display: block;
+  height: calc(100dvh - var(--app-toolbar-h) - var(--app-footer-h));
+  overflow: hidden; /* evita scroll del host */
+}
+/* ===== CONTENEDOR GENERAL ===== */
+.envios-container {
+  padding: 20px 20px 32px;   /* ⬅️ bottom más grande */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 32px;
+}
+
+/* -------- ENCABEZADO -------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    color: #1e3a5f;
+    font-weight: 700;
+  }
+  
+  .btn-nuevo-cliente.mat-mdc-raised-button {
+    --btn1: #4da6ff;  /* mantiene tu paleta */
+    --btn2: #6c63ff;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    height: 40px;            /* alturas “redondas” = texto/ícono más crisp */
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid #1e3a8a;      /* borde real 1px (contorno nítido) */
+    background: linear-gradient(135deg, var(--btn1), var(--btn2));
+    color: #fff;
+
+    font-weight: 700;
+    letter-spacing: .2px;
+    font-family: "Inter","Roboto","Segoe UI",system-ui,-apple-system;
+
+    /* nitidez: sin filtros/transform ni sombras gordas */
+    box-shadow: 0 1px 0 rgba(255,255,255,.10) inset; /* micro highlight */
+    text-shadow: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transform: none;
+    filter: none;
+    transition: background-color .2s ease, border-color .2s ease;
+
+    .mat-icon {
+      font-size: 22px;              /* 22px “engancha” mejor al pixel grid */
+      width: 22px; height: 22px; line-height: 22px;
+      margin-right: 2px;
+      color: currentColor;
+    }
+    .mdc-button__label {
+      text-shadow: none;            /* asegura texto súper nítido */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Shine sutil (solo el destello, sin tocar el botón → no genera blur) */
+    &::after {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: -35%;
+      width: 28%;
+      height: 220%;
+      background: linear-gradient(
+        to right,
+        rgba(255,255,255,0),
+        rgba(255,255,255,.28),
+        rgba(255,255,255,0)
+      );
+      transform: skewX(-20deg);
+      transition: transform .6s ease;
+      pointer-events: none;
+    }
+    &:hover::after {
+      transform: translateX(260%) skewX(-20deg);
+    }
+
+    /* Hover nítido: sin filters; leve cambio de tonos/borde */
+    &:hover {
+      background: linear-gradient(135deg, #5aaeff, #7a74ff);
+      border-color: #1c3fa5;
+    }
+    &:active {
+      background: linear-gradient(135deg, #4a98ff, #6460f3);
+      border-color: #193995;
+    }
+    /* foco accesible y nítido (sin glow borroso) */
+    &:focus-visible {
+      outline: 2px solid #93c5fd;
+      outline-offset: 2px;
+      box-shadow: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .btn-nuevo-envio.mat-mdc-raised-button {
+      height: 38px; padding: 0 14px;
+      .mat-icon { font-size: 20px; width: 20px; height: 20px; }
+    }
+  }
+}
+
+/* ===== Tabla envíos ===== */
+.envios-table {
+  width: 100%;
+  min-width: 900px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  --tbl-head-bg: #1e3a5f;   /* tu azul */
+  --tbl-head-fg: #f2f6ff;
+
+  .mat-mdc-header-row {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: var(--tbl-head-bg);
+    box-shadow: none;
+    filter: none !important;
+    transform: translateZ(0);        /* fuerza capa propia y evita hairlines */
+  }
+
+  .mat-mdc-header-cell {
+    position: relative;              /* para el ::after */
+    background: var(--tbl-head-bg);  /* cada th pinta su propio fondo */
+    color: var(--tbl-head-fg);
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 20px;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    padding: 12px 16px;
+    white-space: nowrap;
+    border-bottom: none !important;
+    text-shadow: none;
+
+    /* 👉 tapa cualquier gap vertical con el MISMO color del header */
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0; right: -0.5px;   /* -0.5px evita que se “abra” al scrollear */
+      width: 1px;
+      background: var(--tbl-head-bg);
+      pointer-events: none;
+      transform: translateZ(0);
+    }
+  }
+  .mat-mdc-header-cell:last-child::after { display: none; }
+
+  .mat-sort-header-arrow { color: var(--tbl-head-fg); }
+
+  .mat-mdc-cell {
+    padding: 12px 16px;
+    color: #333;
+    font-size: 14px;
+    border-bottom: none !important;
+    vertical-align: middle;
+  }
+
+  .mat-mdc-row,
+  .mat-mdc-header-row { border-bottom: none !important; position: relative; }
+
+  .mat-mdc-row::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 1px; background: #e3e8f3;
+  }
+
+  .mat-mdc-row:nth-child(even) .mat-mdc-cell { background: #f5f7fa; }
+}
+
+/* ===== CARD CONTENEDOR ===== */
+.envios-card {
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  overflow: hidden;
+
+  /* llena casi todo el alto pero deja aire abajo */
+  flex: 1 1 auto;
+  min-height: 0;
+  height: calc(100% - 24px);   /* ⬅️ achica un poco el card */
+}
+
+/* ===== FILTRO ===== */
+.filtro-container { padding: 0 2px; }
+
+/* -------- TABLA (desktop) con scroll interno -------- */
+.tabla-scroll {
+  flex: 1 1 auto;
+  max-height: 50vh;
+  overflow: auto;                 /* solo acá hay scroll */
+  overscroll-behavior: contain;
+  padding-bottom: 6px;            /* aire para la última fila */
+  
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+/* Unificamos la línea separadora por fila */
+.mat-mdc-table .mat-mdc-row,
+.mat-mdc-table .mat-mdc-header-row {
+  border-bottom: none !important;
+  position: relative;
+}
+.mat-mdc-table .mat-mdc-row::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: #e3e8f3;
+}
+.mat-mdc-table .mat-mdc-cell,
+.mat-mdc-table .mat-mdc-header-cell {
+  border-bottom: none !important;
+}
+
+th {
+  background-color: #1e3a5f !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 8px;
+  font-size: 14px;
+}
+td {
+  color: #333;
+  padding: 10px 8px;
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+/* zebra */
+tr:nth-child(even) td { background-color: #f5f7fa; }
+
+/* header sticky */
+tr.mat-mdc-header-row {
+  z-index: 2;
+  background: #1e3a5f;
+}
+
+/* Chip estado (usado en tabla) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #eef2ff;
+  color: #334;
+  &.ok { background: #daf8e7; color: #0f7a43; }
+  &.cancelado { background: #f0dbcf; color: #c05f04; }
+  &.eliminado { background: #f0cfcf; color: #b30f0f; }
+}
+
+/* ===== ACCIONES ===== */
+.acciones-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  white-space: nowrap;
+}
+.acciones-cell .mat-mdc-icon-button {
+  width: 36px; height: 36px; line-height: 36px;
+}
+
+/* ===== PAGINADOR ===== */
+mat-paginator {
+  margin-top: 10px;
+  background-color: #e9f3ff;
+  border-radius: 8px;
+}
+
+.paginator-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: #f6f8fb;
+  border-top: 1px solid #e6eaf0;
+
+  /* compactar alto */
+  --mat-paginator-container-size: 44px;
+  padding: 0 8px;
+}
+
+/* botones un poco más chicos */
+.paginator-sticky .mat-mdc-icon-button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+.paginator-min {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: #f6f8fb;
+  border-top: 1px solid #e6eaf0;
+
+  /* más compacto */
+  --mat-paginator-container-size: 36px;
+  padding: 0 4px;
+}
+
+.paginator-min .mat-mdc-icon-button {
+  width: 32px; height: 32px; padding: 0;
+}
+.page-chip {
+  position: sticky;
+  bottom: 6px;
+  margin-left: auto;
+  width: fit-content;
+  background: #e8eef7;
+  color: #234;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* por si algo vuelve a mostrar el range label, lo escondemos */
+.paginator-min .mat-mdc-paginator-range-label { display: none; }
+.paginator-min .mat-mdc-paginator-page-size { display: none; }
+
+/* ===== TOGGLES DESKTOP / MOBILE ===== */
+.only-mobile  { display: none; }
+
+/* ===== Overlay de carga ===== */
+.loading-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300; /* bajo los dialogs (mdc≈2000) */
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  pointer-events: all;
+}
+
+.loading-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 24px rgba(0,0,0,.12);
+  color: #1e3a5f;
+  font-weight: 600;
+}
+
+/* ===== MOBILE: lista de envíos (cards) ===== */
+@media (max-width: 768px) {
+  .only-desktop { display: none !important; }
+  .only-mobile  { display: block !important; }
+
+  .envios-card { height: calc(100% - 12px); }
+
+  .mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding-bottom: 6px;
+  }
+
+  .envio-card {
+    background: #fff;
+    border: 1px solid #e7ecf4;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    transition: box-shadow .15s ease, transform .15s ease;
+
+    &:hover { box-shadow: 0 3px 10px rgba(0,0,0,.12); transform: translateY(-1px); }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+
+      .nro { font-weight: 700; color: #1e3a5f; font-size: 14px; }
+      .estado {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #eef2ff; color: #334;
+          &.ok { background: #daf8e7; color: #0f7a43; }
+          &.cancelado { background: #f0dbcf; color: #c05f04; }
+          &.eliminado { background: #f0cfcf; color: #b30f0f; }
+      }
+    }
+
+    .cliente { margin-top: 4px; font-weight: 600; color: #334; }
+
+    .ruta {
+      margin-top: 6px;
+      display: flex; align-items: center; gap: 6px;
+      color: #556; font-size: 13px;
+
+      .mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    }
+
+    .dirs {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #667;
+      line-height: 1.25;
+
+      > div + div { margin-top: 2px; }
+    }
+
+    .acciones {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+  }
+}

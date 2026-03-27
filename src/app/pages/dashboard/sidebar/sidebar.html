@@ -1,0 +1,29 @@
+<div class="sidebar-wrapper">
+  <nav class="sidebar" [class.collapsed]="collapsed">
+    <div class="toggle-btn" (click)="toggleSidebar()">
+      <mat-icon>menu</mat-icon>
+    </div>
+
+    <a routerLink="clientes" routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       (click)="onItemClick()">
+      <mat-icon>groups</mat-icon>
+      <span *ngIf="!collapsed">Clientes</span>
+    </a>
+
+    <a routerLink="envios" routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       (click)="onItemClick()">
+      <mat-icon>local_shipping</mat-icon>
+      <span *ngIf="!collapsed">Envíos</span>
+    </a>
+
+    <!-- Cerrar sesión -->
+    <a href
+       (click)="onLogout($event)"
+       [class.disabled]="logoutLoading">
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="!collapsed">Cerrar sesión</span>
+    </a>
+  </nav>
+</div>

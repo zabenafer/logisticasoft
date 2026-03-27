@@ -1,0 +1,124 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Evita scroll global */
+  box-sizing: border-box;
+}
+/* 🎨 Fondo azul */
+.login-container {
+  min-height: 100dvh; /* compatible con móviles y escritorios */
+  width: 100%;
+  background: linear-gradient(135deg, #0a2a6c, #001c44);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* 📦 Tarjeta centrada */
+.login-card {
+  background-color: #ffffff;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  animation: fadeIn .4s ease-in;
+  box-sizing: border-box;
+}
+
+/* 📱 Ajustes móviles: reduce padding para pantallas pequeñas */
+@media (max-height: 700px) {
+  .login-card {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* 📝 Estilos de texto */
+h2 {
+  font-size: 1.6rem;
+  color: #0a2a6c;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  color: #777;
+  font-size: 0.95rem;
+  margin-bottom: 25px;
+}
+
+/* 📋 Formularios */
+.full-width {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.remember {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  line-height: 1;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  gap: 12px;
+  margin: 6px 0 20px;
+
+  .forgot-password {
+    text-decoration: none;
+    color: #1e40af;
+    font-weight: 500;
+    font-size: .9rem;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* reemplazá tu .login-button por esto */
+.login-button {
+  width: 100%;
+  background-color: #1e40af !important;
+  color: #fff;
+  padding: 12px 0;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Inter", "Roboto", "Segoe UI", Arial, sans-serif;
+
+  /* 👇 clave para nitidez */
+  letter-spacing: 0;                 /* <— quita el 0.2px */
+  font-size: 16px;                   /* bump a 16 ayuda en Windows */
+  -webkit-font-smoothing: antialiased;   /* mejor para blanco sobre azul */
+  text-rendering: optimizeLegibility;    /* mejor kerning/hints */
+}
+
+.login-button.mat-mdc-button-base {
+  --mdc-filled-button-container-color: #07205a; /* un tono más */
+}
+
+/* ✨ Animación */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host {
+  display: block;
+  height: 100dvh;
+  overflow: hidden; /* ✅ Solo bloquea el scroll en el login */
+}

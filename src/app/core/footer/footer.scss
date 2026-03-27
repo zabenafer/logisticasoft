@@ -1,0 +1,32 @@
+.footer-fixed {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--app-footer-h);
+  z-index: 1000;
+  padding: 0 12px;
+  backdrop-filter: saturate(120%) blur(2px);
+  border-top: 1px solid rgba(255,255,255,.12); /* leve separación */
+}
+
+.footer-fixed.light { background:#293f5f; color:rgb(255, 255, 255); border-top:1px solid #e4e8ef; }
+
+.footer-inner {
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand { font-size: .9rem; opacity: .95; display: flex; gap: 8px; }
+.links a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+.hide-sm { display: inline; }
+
+@media (max-width: 640px) {
+  .brand .copy { display: none; }
+  .hide-sm { display: none; } /* compacta los textos en mobile */
+}

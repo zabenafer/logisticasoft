@@ -1,0 +1,124 @@
+/* Altura del toolbar (si no la definiste global, la definimos acá) */
+:host {
+  --app-toolbar-h: 0px;
+}
+@media (max-width: 599px) {
+  :host { --app-toolbar-h: 56px; }
+}
+
+/* Contenedor que ocupa la altura visible (menos el navbar),
+   centrado total, con padding lateral para mobile */
+.seguimiento-container {
+  min-height: calc(100vh - var(--app-toolbar-h));
+  padding: 24px 16px;
+  box-sizing: border-box;
+
+  display: grid;
+  place-items: center; /* centra horizontal y vertical */
+}
+
+/* Card responsiva y centrada */
+.seguimiento-card {
+  width: min(720px, 100%);
+  padding: 1.5rem;
+  margin: 0; /* no hace falta margin-top si usamos grid center */
+}
+
+/* --------- lo tuyo (con pequeños ajustes) ---------- */
+
+.seguimiento-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 1rem;
+    color: #777;
+    margin: 0;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .entrega-estimada {
+    text-align: right;
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    .fecha-entrega {
+      color: #0b8e36;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 30px;
+    width: 2px;
+    height: calc(100% - 30px);
+    background-color: #d3d3d3;
+  }
+
+  &:last-child::before { display: none; }
+
+  .timeline-icon {
+    background-color: #d3d3d3;
+    border-radius: 50%;
+    padding: 6px;
+    margin-right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+  }
+
+  .timeline-content {
+    h4 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .fecha {
+      color: #555;
+      font-size: 0.9rem;
+      margin: 3px 0;
+    }
+
+    p {
+      margin: 0;
+      color: #666;
+    }
+  }
+
+  &.activo .timeline-icon { background-color: #007bff; }
+  &.activo h4 { color: #007bff; }
+
+  &.completado .timeline-icon { background-color: #4caf50; }
+  &.completado h4 { color: #4caf50; }
+}
