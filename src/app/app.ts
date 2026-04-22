@@ -1,12 +1,13 @@
-import { Component, ElementRef, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './core/navbar/navbar';
 import { filter } from 'rxjs';
-import { Footer } from "./core/footer/footer";
+import { Footer } from './core/footer/footer';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, Footer],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, Footer],
   standalone: true,
   templateUrl: './app.html',
   styleUrls: ['./app.scss']
@@ -14,14 +15,33 @@ import { Footer } from "./core/footer/footer";
 export class App {
   protected readonly title = signal('logisticasoft-frontend');
 
-  constructor(private router: Router, private host: ElementRef<HTMLElement>) {
-  this.router.events.pipe(filter(e => e instanceof NavigationEnd))
-    .subscribe(() => {
-      const url = this.router.url.split('?')[0];
-      const noOffset = url === '/login' || url.startsWith('/home'); // ajustá a gusto
-      this.host.nativeElement.querySelector('.app-main')
-        ?.classList.toggle('no-offset', noOffset);
-    });
-}
-}
+  showNavbar = false;
+  showFooter = true;
+  noOffset = false;
+  noFooter = false;
 
+  constructor(private router: Router) {
+    this.updateLayout(this.router.url);
+
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        this.updateLayout(this.router.url);
+      });
+  }
+
+  private updateLayout(urlWithQuery: string): void {
+    const url = urlWithQuery.split('?')[0];
+
+    const isHome = url === '/' || url.startsWith('/home');
+    const isLogin = url.startsWith('/login');
+    const isSeguimiento = url.startsWith('/seguimiento');
+    const isDashboard = url.startsWith('/dashboard');
+
+    this.showNavbar = isDashboard;
+    this.showFooter = !isDashboard;
+
+    this.noOffset = isHome || isLogin || isSeguimiento;
+    this.noFooter = isDashboard;
+  }
+}
