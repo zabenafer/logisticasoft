@@ -1,24 +1,54 @@
-<mat-toolbar color="basic" class="footer-fixed light">
-
+<footer class="site-footer">
   <div class="footer-inner">
-    <div class="brand">
-      <span class="name">© {{ year }} LogisticaSoft</span>
+    <div class="footer-grid">
+      <div class="footer-col brand-col">
+        <h3 class="footer-brand">Enviux</h3>
+        <p class="footer-description">
+          Plataforma para gestionar y seguir envíos de forma simple, rápida y segura.
+        </p>
+      </div>
+
+      <div class="footer-col contact-col">
+        <h4>Contacto</h4>
+
+        <a class="footer-link" href="mailto:zabenafer@gmail.com">
+          <mat-icon>mail</mat-icon>
+          <span>zabenafer@gmail.com</span>
+        </a>
+
+        <a class="footer-link" href="tel:+5493534276544" rel="nofollow">
+          <mat-icon>call</mat-icon>
+          <span>+54 9 353 4276544</span>
+        </a>
+      </div>
+
+      <div class="footer-col access-col">
+        <h4>Accesos</h4>
+
+        <a class="footer-link" routerLink="/home">
+          <mat-icon>local_shipping</mat-icon>
+          <span>Seguimiento</span>
+        </a>
+
+        <a class="footer-link" routerLink="/login" [queryParams]="{ portal: 'cliente' }">
+          <mat-icon>person</mat-icon>
+          <span>Portal de Clientes</span>
+        </a>
+
+        <a class="footer-link" routerLink="/login" [queryParams]="{ portal: 'transportista' }">
+          <mat-icon>alt_route</mat-icon>
+          <span>Panel de Transportistas</span>
+        </a>
+
+        <a class="footer-link" routerLink="/login" [queryParams]="{ portal: 'deposito' }">
+          <mat-icon>inventory_2</mat-icon>
+          <span>Gestión de Depósito</span>
+        </a>
+      </div>
     </div>
 
-    <div class="links">
-      <a mat-button href="mailto:zabenafer@gmail.com">
-        <mat-icon>mail</mat-icon>
-        <span class="hide-sm">zabenafer@gmail.com</span>
-      </a>
-
-      <a mat-button href="tel:+5493534276544" rel="nofollow">
-        <mat-icon>call</mat-icon>
-        <span class="hide-sm">+54 9 353 4276544</span>
-      </a>
-
-      <a mat-icon-button href="https://tuweb.com" target="_blank" rel="noopener" aria-label="Sitio web">
-        <mat-icon>public</mat-icon>
-      </a>
+    <div class="footer-bottom">
+      <span>© {{ year }} Enviux. Todos los derechos reservados.</span>
     </div>
   </div>
-</mat-toolbar>
+</footer>

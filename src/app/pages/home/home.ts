@@ -7,6 +7,16 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
+type PortalType = 'cliente' | 'transportista' | 'deposito';
+
+interface PortalCard {
+  tipo: PortalType;
+  titulo: string;
+  descripcion: string;
+  icono: string;
+  clase: string;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -19,10 +29,41 @@ export class HomeComponent {
   loading: boolean = false;
   errorMessage: string = '';
 
-  constructor(private trackingService: Tracking,
+  portales: PortalCard[] = [
+    {
+      tipo: 'cliente',
+      titulo: 'Portal de Clientes',
+      descripcion: 'Consultá tus envíos y su estado en tiempo real.',
+      icono: 'inventory_2',
+      clase: 'card-cliente'
+    },
+    {
+      tipo: 'transportista',
+      titulo: 'Panel de Transportistas',
+      descripcion: 'Gestioná envíos, rutas y estados.',
+      icono: 'alt_route',
+      clase: 'card-transportista'
+    },
+    {
+      tipo: 'deposito',
+      titulo: 'Gestión de Depósito',
+      descripcion: 'Controlá paquetes, ingresos, egresos y movimientos internos del depósito.',
+      icono: 'warehouse',
+      clase: 'card-deposito'
+    }
+  ];
+
+  constructor(
+    private trackingService: Tracking,
     private envioState: EnvioStateService,
     private router: Router
   ) { }
+
+  ingresarPortal(tipo: PortalType): void {
+    this.router.navigate(['/login'], {
+      queryParams: { portal: tipo }
+    });
+  }
 
   /**
    * Ejecuta la búsqueda del envío al hacer click en el botón.

@@ -1,5 +1,11 @@
-<app-navbar class="navbar-fixed"></app-navbar>
-<main class="app-main">
+<app-navbar *ngIf="showNavbar" class="navbar-fixed"></app-navbar>
+
+<main
+  class="app-main"
+  [class.no-offset]="noOffset"
+  [class.no-footer]="noFooter"
+>
   <router-outlet></router-outlet>
 </main>
-<app-footer></app-footer>
+
+<app-footer *ngIf="showFooter"></app-footer>
