@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EnvioTracking } from '../../models/EnvioTracking.model';
 import { EnvioStateService } from '../../services/envio-state.service';
 import { SharedImports } from '../../material.module';
@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-seguimiento',
   standalone: true,
-  imports: [SharedImports, CommonModule, FormsModule],
+  imports: [SharedImports, CommonModule, FormsModule, RouterLink],
   templateUrl: './seguimiento.html',
   styleUrls: ['./seguimiento.scss']
 })

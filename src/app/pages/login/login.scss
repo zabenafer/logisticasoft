@@ -1,124 +1,410 @@
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden; /* Evita scroll global */
-  box-sizing: border-box;
+:host {
+  display: block;
 }
-/* 🎨 Fondo azul */
-.login-container {
-  min-height: 100dvh; /* compatible con móviles y escritorios */
-  width: 100%;
-  background: linear-gradient(135deg, #0a2a6c, #001c44);
+
+.login-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top, rgba(77, 166, 255, 0.08), transparent 30%),
+    linear-gradient(to bottom, #d1dceb 0%, #fdfdfd 100%);
+  
+  /* ✅ CAMBIOS CLAVE */
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  overflow-y: auto;
+  padding: 32px 16px;  /* Sacamos el padding-bottom asimétrico */
+}
+
+.login-shell {
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  color: #0f172a;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--portal-link);
+  transform: translateX(-2px);
+}
+
+.back-link mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.login-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 26px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+  padding: 34px 28px 28px;
   overflow: hidden;
 }
 
-/* 📦 Tarjeta centrada */
-.login-card {
-  background-color: #ffffff;
-  padding: 2.5rem 2rem;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-  animation: fadeIn .4s ease-in;
-  box-sizing: border-box;
+.login-top-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, var(--portal-primary), color-mix(in srgb, var(--portal-primary) 70%, white));
 }
 
-/* 📱 Ajustes móviles: reduce padding para pantallas pequeñas */
-@media (max-height: 700px) {
-  .login-card {
-    padding: 1.5rem 1rem;
-  }
+.portal-badge {
+  width: 84px;
+  height: 84px;
+  margin: 10px auto 22px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--portal-primary) 92%, white),
+    color-mix(in srgb, var(--portal-primary) 72%, black 8%)
+  );
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--portal-primary) 18%, transparent);
 }
 
-/* 📝 Estilos de texto */
+.portal-badge mat-icon {
+  color: #ffffff;
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+}
+
 h2 {
-  font-size: 1.6rem;
-  color: #0a2a6c;
-  margin-bottom: 5px;
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 2.15rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .subtitle {
-  color: #777;
-  font-size: 0.95rem;
-  margin-bottom: 25px;
+  margin: 0 0 28px;
+  text-align: center;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #64748b;
 }
 
-/* 📋 Formularios */
+.login-form {
+  display: block;
+}
+
 .full-width {
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
-.remember {
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
-  line-height: 1;
+.password-toggle {
+  color: #64748b;
+}
+
+.password-toggle:hover {
+  color: var(--portal-link);
 }
 
 .options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
   gap: 12px;
-  margin: 6px 0 20px;
-
-  .forgot-password {
-    text-decoration: none;
-    color: #1e40af;
-    font-weight: 500;
-    font-size: .9rem;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
+  margin: 4px 0 22px;
+  font-size: 0.92rem;
 }
 
-/* reemplazá tu .login-button por esto */
+.remember {
+  color: #334155;
+}
+
+.forgot-password {
+  color: var(--portal-link);
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
 .login-button {
   width: 100%;
-  background-color: #1e40af !important;
-  color: #fff;
-  padding: 12px 0;
+  min-height: 52px;
+  border-radius: 12px !important;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.01em;  /* ✅ Evita que el texto se vea aplastado */
+  color: #ffffff !important;
+  background-color: var(--portal-primary) !important;
+  box-shadow: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+
+  /* ✅ Esto es lo clave — limpia el overlay interno de Material */
+  --mat-filled-button-state-layer-color: transparent;
+  --mat-filled-button-ripple-color: rgba(255, 255, 255, 0.15);
+
+  /* ✅ Fuerza renderizado nítido */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translateZ(0);  /* Activa aceleración GPU */
+  backface-visibility: hidden;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-1px) translateZ(0);  /* ✅ Mantiene la GPU activa en hover */
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--portal-primary) 22%, transparent) !important;
+  filter: brightness(0.95);
+}
+
+.login-button:disabled {
+  opacity: 0.65;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0 18px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.google-button {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid #dbe4ee;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 1rem;
   font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: "Inter", "Roboto", "Segoe UI", Arial, sans-serif;
-
-  /* 👇 clave para nitidez */
-  letter-spacing: 0;                 /* <— quita el 0.2px */
-  font-size: 16px;                   /* bump a 16 ayuda en Windows */
-  -webkit-font-smoothing: antialiased;   /* mejor para blanco sobre azul */
-  text-rendering: optimizeLegibility;    /* mejor kerning/hints */
+  cursor: default;
+  opacity: 0.92;
 }
 
-.login-button.mat-mdc-button-base {
-  --mdc-filled-button-container-color: #07205a; /* un tono más */
+.google-button img {
+  width: 20px;
+  height: 20px;
 }
 
-/* ✨ Animación */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+.error-msg {
+  margin: 16px 0 0;
+  text-align: center;
+  color: #dc2626;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* Ajustes suaves para Material */
+
+::ng-deep .login-button .mdc-button__label {
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.04em !important;  /* ✅ Más espacio entre letras */
+  -webkit-font-smoothing: antialiased !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+.login-button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transform: none;
+  backface-visibility: visible;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: none;
+  background-color: color-mix(in srgb, var(--portal-primary) 92%, black 8%) !important;
+}
+
+::ng-deep .login-button .mdc-button__label {
+  letter-spacing: 0.02em !important;
+  -webkit-font-smoothing: auto !important;
+  text-rendering: auto !important;
+}
+
+::ng-deep .mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: #d6deea;
+  --mdc-outlined-text-field-hover-outline-color: #c3cfdf;
+  --mdc-outlined-text-field-focus-outline-color: var(--portal-primary);
+  --mdc-outlined-text-field-focus-label-text-color: var(--portal-primary);
+  --mdc-outlined-text-field-caret-color: var(--portal-primary);
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+::ng-deep .mat-mdc-checkbox.mat-accent {
+  --mdc-checkbox-selected-checkmark-color: #ffffff;
+  --mdc-checkbox-selected-focus-icon-color: var(--portal-primary);
+  --mdc-checkbox-selected-hover-icon-color: var(--portal-primary);
+  --mdc-checkbox-selected-icon-color: var(--portal-primary);
+  --mdc-checkbox-selected-pressed-icon-color: var(--portal-primary);
+}
+
+@media (max-width: 768px) {
+  .login-page {
+    padding: 24px 12px 36px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .login-card {
+    padding: 26px 18px 22px;
+    border-radius: 22px;
+  }
+
+  .portal-badge {
+    width: 74px;
+    height: 74px;
+    margin-bottom: 18px;
+  }
+
+  .portal-badge mat-icon {
+    font-size: 34px;
+    width: 34px;
+    height: 34px;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    font-size: 0.98rem;
+    margin-bottom: 22px;
+  }
+
+  .options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .forgot-password {
+    white-space: normal;
   }
 }
 
-:host {
-  display: block;
-  height: 100dvh;
-  overflow: hidden; /* ✅ Solo bloquea el scroll en el login */
+/* Notebooks y monitores medianos */
+@media (max-height: 800px) {
+  .login-page {
+    padding: 24px 16px;
+    justify-content: flex-start; /* En altura chica, mejor desde arriba con scroll */
+  }
+
+  .portal-badge {
+    width: 68px;
+    height: 68px;
+    margin: 6px auto 14px;
+  }
+
+  .portal-badge mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+  }
+
+  .login-card {
+    padding: 24px 24px 20px;
+  }
+
+  .full-width {
+    margin-bottom: 12px;
+  }
+
+  .options {
+    margin: 0 0 14px;
+  }
+
+  .divider {
+    margin: 14px 0 12px;
+  }
+}
+
+/* Pantallas muy chicas (ej: 768px alto o menos) */
+@media (max-height: 680px) {
+  .portal-badge {
+    width: 54px;
+    height: 54px;
+    margin: 4px auto 10px;
+    border-radius: 16px;
+  }
+
+  .portal-badge mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+  }
+
+  .login-card {
+    padding: 20px 20px 16px;
+    border-radius: 18px;
+  }
+
+  .login-button {
+    min-height: 44px;
+  }
+
+  .google-button {
+    min-height: 42px;
+  }
+
+  .full-width {
+    margin-bottom: 8px;
+  }
+
+  .divider {
+    margin: 10px 0 8px;
+  }
 }
