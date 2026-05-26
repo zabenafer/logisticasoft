@@ -79,3 +79,8 @@ body {
 .app-main.no-footer {
   min-height: calc(100dvh - var(--app-toolbar-h));
 }
+
+.app-main.no-scroll-main {
+  height: 100dvh;
+  overflow: hidden;
+}

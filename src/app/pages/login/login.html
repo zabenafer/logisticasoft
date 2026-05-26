@@ -1,36 +1,101 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2>Bienvenido de Nuevo</h2>
-    <p class="subtitle">Inicia sesión para gestionar tus envíos.</p>
+<div
+  class="login-page"
+  [ngStyle]="{
+    '--portal-primary': portalActual.colorPrincipal,
+    '--portal-soft': portalActual.colorSuave,
+    '--portal-border': portalActual.colorBorde,
+    '--portal-text': portalActual.colorTexto,
+    '--portal-link': portalActual.colorLink
+  }"
+>
+  <div class="login-shell">
+    <a routerLink="/home" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Volver al inicio</span>
+    </a>
 
-    <form (ngSubmit)="onLogin()">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Usuario o Email</mat-label>
-        <input matInput [(ngModel)]="usuario" name="usuario" required
-              autocomplete="username" autocapitalize="none" spellcheck="false"/>
-        <mat-icon matPrefix>person</mat-icon>
-      </mat-form-field>
+    <div class="login-card">
+      <div class="login-top-accent"></div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Contraseña</mat-label>
-        <input matInput [(ngModel)]="password" name="password" type="password" required
-              autocomplete="current-password"/>
-        <mat-icon matPrefix>lock</mat-icon>
-      </mat-form-field>
-
-      <!-- fila de opciones: checkbox a la izquierda / link a la derecha -->
-      <div class="options">
-        <mat-checkbox class="remember" [(ngModel)]="recordarme" name="recordarme">
-          Recordarme
-        </mat-checkbox>
-
-        <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+      <div class="portal-badge">
+        <mat-icon>{{ portalActual.icono }}</mat-icon>
       </div>
 
-      <!-- Mejor usar flat button con color Material (texto más nítido) -->
-      <button mat-flat-button type="submit" class="login-button">
-        Iniciar Sesión
-      </button>
-    </form>
+      <h2>{{ portalActual.titulo }}</h2>
+      <p class="subtitle">{{ portalActual.subtitulo }}</p>
+
+      <form (ngSubmit)="onLogin()" class="login-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Usuario o Email</mat-label>
+          <input
+            matInput
+            [(ngModel)]="usuario"
+            name="usuario"
+            required
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+          />
+          <mat-icon matPrefix>mail</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input
+            matInput
+            [(ngModel)]="password"
+            name="password"
+            [type]="showPassword ? 'text' : 'password'"
+            required
+            autocomplete="current-password"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            class="password-toggle"
+            (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-pressed]="showPassword"
+          >
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <div class="options">
+          <mat-checkbox class="remember" [(ngModel)]="recordarme" name="recordarme">
+            Recordarme
+          </mat-checkbox>
+
+          <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="login-button"
+          [disabled]="loading"
+        >
+          {{ loading ? 'Ingresando...' : portalActual.botonTexto }}
+        </button>
+
+        <div class="divider">
+          <span>o continuá con</span>
+        </div>
+
+        <button type="button" class="google-button" disabled>
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google"
+          />
+          <span>Continuar con Google</span>
+        </button>
+
+        <p class="error-msg" *ngIf="errorMsg">
+          {{ errorMsg }}
+        </p>
+      </form>
+    </div>
   </div>
 </div>

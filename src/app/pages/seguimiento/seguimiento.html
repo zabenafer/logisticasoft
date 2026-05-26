@@ -1,4 +1,10 @@
 <div class="seguimiento-container">
+  <div class="seguimiento-shell">
+    <a routerLink="/home" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Volver al inicio</span>
+    </a>
+
   <ng-container *ngIf="envio; else noData">
     <mat-card class="seguimiento-card">
       <div class="seguimiento-header">
@@ -41,4 +47,5 @@
       <p style="text-align:center; margin: 0;">No hay datos para mostrar.</p>
     </mat-card>
   </ng-template>
+  </div>
 </div>

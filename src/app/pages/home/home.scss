@@ -3,7 +3,7 @@
   padding: 40px 24px 32px;
   background:
     radial-gradient(circle at top, rgba(77, 166, 255, 0.08), transparent 30%),
-    linear-gradient(to bottom, #f8fbff 0%, #ffffff 100%);
+    linear-gradient(to bottom, #d1dceb 0%, #fdfdfd 100%);
 }
 
 .hero {
@@ -169,8 +169,8 @@
   border-radius: 24px;
   border: 1px solid #dbe4ee;
   background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.10);
+  transition: all 0.25s ease;
   position: relative;
   overflow: hidden;
 
@@ -178,6 +178,24 @@
   flex-direction: column;
   min-height: 405px;
   cursor: pointer;
+}
+
+.portal-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255,255,255,0.4),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.portal-card:hover::after {
+  opacity: 0.15;
 }
 
 .portal-card:focus-visible {
@@ -198,7 +216,7 @@
 
 .portal-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 26px 50px rgba(9, 14, 26, 0.18);
 }
 
 .portal-card:hover::before {
@@ -207,6 +225,10 @@
 
 .portal-card:hover .portal-link mat-icon {
   transform: translateX(4px);
+}
+
+.portal-card:active {
+  transform: translateY(-2px) scale(0.995);
 }
 
 .portal-icon {
