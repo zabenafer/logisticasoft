@@ -1,5 +1,6 @@
 <div
   class="login-page"
+  [class.auth-validating]="validandoClerk"
   [ngStyle]="{
     '--portal-primary': portalActual.colorPrincipal,
     '--portal-soft': portalActual.colorSuave,
@@ -24,7 +25,10 @@
       <h2>{{ portalActual.titulo }}</h2>
       <p class="subtitle">{{ portalActual.subtitulo }}</p>
 
-      <form (ngSubmit)="onLogin()" class="login-form">
+      <form
+        (ngSubmit)="onLogin()"
+        class="login-form"
+      >
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Usuario o Email</mat-label>
           <input
@@ -35,6 +39,7 @@
             autocomplete="username"
             autocapitalize="none"
             spellcheck="false"
+            [disabled]="loadingLocal || loadingClerk || validandoClerk"
           />
           <mat-icon matPrefix>mail</mat-icon>
         </mat-form-field>
@@ -48,14 +53,17 @@
             [type]="showPassword ? 'text' : 'password'"
             required
             autocomplete="current-password"
+            [disabled]="loadingLocal || loadingClerk || validandoClerk"
           />
           <mat-icon matPrefix>lock</mat-icon>
+
           <button
             mat-icon-button
             matSuffix
             type="button"
             class="password-toggle"
             (click)="showPassword = !showPassword"
+            [disabled]="loadingLocal || loadingClerk || validandoClerk"
             [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
             [attr.aria-pressed]="showPassword"
           >
@@ -64,7 +72,12 @@
         </mat-form-field>
 
         <div class="options">
-          <mat-checkbox class="remember" [(ngModel)]="recordarme" name="recordarme">
+          <mat-checkbox
+            class="remember"
+            [(ngModel)]="recordarme"
+            name="recordarme"
+            [disabled]="loadingLocal || loadingClerk || validandoClerk"
+          >
             Recordarme
           </mat-checkbox>
 
@@ -75,27 +88,42 @@
           mat-flat-button
           type="submit"
           class="login-button"
-          [disabled]="loading"
+          [disabled]="loadingLocal || loadingClerk || validandoClerk"
         >
-          {{ loading ? 'Ingresando...' : portalActual.botonTexto }}
+          {{ loadingLocal ? 'Ingresando...' : portalActual.botonTexto }}
         </button>
 
         <div class="divider">
           <span>o continuá con</span>
         </div>
 
-        <button type="button" class="google-button" disabled>
+        <button
+          type="button"
+          class="google-button"
+          [class.loading]="loadingClerk"
+          [disabled]="loadingLocal || loadingClerk || validandoClerk"
+          (click)="onLoginClerk()"
+        >
           <img
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt="Google"
           />
-          <span>Continuar con Google</span>
+          <span>{{ loadingClerk ? 'Conectando con Google...' : 'Continuar con Google' }}</span>
         </button>
 
-        <p class="error-msg" *ngIf="errorMsg">
+        <p class="error-msg" *ngIf="errorMsg && !validandoClerk">
           {{ errorMsg }}
         </p>
       </form>
+    </div>
+  </div>
+
+  <div class="auth-overlay" *ngIf="validandoClerk">
+    <div class="auth-overlay-card">
+      <mat-spinner diameter="42"></mat-spinner>
+
+      <h3>Validando tu cuenta...</h3>
+      <p>Estamos verificando tus permisos de acceso.</p>
     </div>
   </div>
 </div>

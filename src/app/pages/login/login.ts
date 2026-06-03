@@ -6,10 +6,10 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environment';
+import { ClerkAuthService } from '../../auth/clerk-auth.service';
+import { PortalType } from '../../auth/auth.models';
 
 const LAST_USER_KEY = 'ls_last_user';
-
-type PortalType = 'cliente' | 'transportista' | 'deposito';
 
 interface PortalConfig {
   tipo: PortalType;
@@ -36,7 +36,11 @@ export class LoginComponent implements OnInit {
   password = '';
   showPassword = false;
   recordarme = false;
-  loading = false;
+
+  loadingLocal = false;
+  loadingClerk = false;
+  validandoClerk = false;
+
   errorMsg = '';
   portal: PortalType = 'cliente';
 
@@ -87,6 +91,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private router: Router,
     private auth: AuthService,
+    private clerkAuth: ClerkAuthService,
     private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
@@ -94,12 +99,15 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.clerkAuth.preload();
+
     if (environment.prefillLogin) {
       this.usuario = environment.devLoginUser;
       this.password = environment.devLoginPass;
       this.recordarme = true;
     } else if (this.isBrowser) {
       const last = localStorage.getItem(LAST_USER_KEY);
+
       if (last) {
         this.usuario = last;
         this.recordarme = true;
@@ -136,7 +144,11 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    this.loading = true;
+    if (this.loadingLocal || this.loadingClerk || this.validandoClerk) {
+      return;
+    }
+
+    this.loadingLocal = true;
     this.errorMsg = '';
 
     this.auth.login({ usernameOrEmail: this.usuario, password: this.password })
@@ -152,15 +164,52 @@ export class LoginComponent implements OnInit {
             }
           }
 
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/auth/callback'], {
+            queryParams: {
+              portal: this.portal,
+              source: 'local'
+            }
+          });
         },
         error: err => {
           this.errorMsg = 'Credenciales inválidas';
           console.error(err);
+          this.loadingLocal = false;
         }
-      })
-      .add(() => {
-        this.loading = false;
       });
+  }
+
+  async onLoginClerk(): Promise<void> {
+    if (this.loadingLocal || this.loadingClerk || this.validandoClerk) {
+      return;
+    }
+
+    this.loadingClerk = true;
+    this.validandoClerk = true;
+    this.errorMsg = '';
+
+    try {
+      this.auth.clearToken();
+
+      const yaTieneSesionClerk = await this.clerkAuth.isSignedIn();
+
+      if (yaTieneSesionClerk) {
+        await this.router.navigate(['/auth/callback'], {
+          queryParams: {
+            portal: this.portal,
+            source: 'clerk'
+          }
+        });
+        return;
+      }
+
+      await this.clerkAuth.signIn(this.portal);
+
+    } catch (err) {
+      console.error(err);
+      this.errorMsg = 'No se pudo iniciar sesión con Google.';
+      this.loadingClerk = false;
+      this.validandoClerk = false;
+    }
   }
 }

@@ -7,4 +7,5 @@ export const environment = {
   prefillLogin: false,
   devLoginUser: 'admin',
   devLoginPass: 'admin',
+  clerkPublishableKey: 'pk_test_c291Z2h0LXdhbGxhYnktMjYuY2xlcmsuYWNjb3VudHMuZGV2JA'
 };
