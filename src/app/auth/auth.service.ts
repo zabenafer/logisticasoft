@@ -2,14 +2,14 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { LoginRequest, LoginResponse, RefreshResponse } from './auth.models';
+import { LoginRequest, LoginResponse, RefreshResponse, MeDTO } from './auth.models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private accessToken: string | null = null;
   private readonly KEY_LOCAL  = 'ls_access_token';
   private readonly KEY_SESSION = 'ls_access_token_session';
-  private readonly EXP_SKEW_SEC = 30;
+  private readonly EXP_SKEW_SEC = 30; 
 
   constructor(
     private http: HttpClient,
@@ -27,6 +27,7 @@ export class AuthService {
   login(req: LoginRequest) { return this.http.post<LoginResponse>('/api/auth/login', req); }
   logout() { this.clearToken(); return this.http.post<void>('/api/auth/logout', {}); }
   refresh() { return this.http.post<RefreshResponse>('/api/auth/refresh', {}); }
+  me() { return this.http.get<MeDTO>('/api/me'); }
 
   setAccessToken(token: string, remember = false) {
     this.accessToken = token;

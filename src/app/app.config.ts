@@ -20,8 +20,10 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withInterceptors([authInterceptor])),
-    provideHttpClient(withFetch()),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor])
+    ),
     { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-outlined' } },
     { provide: MatPaginatorIntl, useFactory: getMinimalPaginatorIntl },
     

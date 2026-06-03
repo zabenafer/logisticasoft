@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { SharedImports } from '../../../material.module';
 import { AuthService } from '../../../auth/auth.service';
+import { ClerkAuthService } from '../../../auth/clerk-auth.service';
+import { firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { AuthSessionService } from '../../../auth/auth-session.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -18,7 +22,10 @@ export class SidebarComponent {
 
   logoutLoading = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(  private auth: AuthService,
+                private clerkAuth: ClerkAuthService,
+                private session: AuthSessionService,
+                private router: Router) {}
 
   // Pedimos el cambio al padre (no tocamos estado local directamente)
   toggleSidebar() {
@@ -29,22 +36,34 @@ export class SidebarComponent {
     this.itemSelected.emit(); // el padre cierra
   }
 
-  onLogout(ev: Event) {
+  async onLogout(ev: Event) {
     ev.preventDefault();
+
     if (this.logoutLoading) return;
+
     this.logoutLoading = true;
 
-    this.auth.logout()
-      .subscribe({
-        next: () => {
-          // tokens ya se limpiaron en AuthService.logout()
-          this.router.navigate(['/login']); 
-        },
-        error: () => {
-          // aunque falle el POST, ya borramos el access en el front:
-          this.router.navigate(['/login']);
-        }
-      })
-      .add(() => this.logoutLoading = false);
+    try {
+      // 1. Cierra sesión local: limpia accessToken y revoca refresh cookie si existe
+      await firstValueFrom(
+        this.auth.logout().pipe(
+          catchError(() => of(null))
+        )
+      );
+
+      // 2. Cierra sesión Clerk/Google si existe
+      await this.clerkAuth.signOut();
+
+      this.session.clear();
+
+      // 3. Limpia datos auxiliares del portal
+      sessionStorage.removeItem('ls_portal_intent');
+
+      // 4. Vuelve al home para elegir portal
+      await this.router.navigate(['/home']);
+
+    } finally {
+      this.logoutLoading = false;
+    }
   }
 }
