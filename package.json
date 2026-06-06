@@ -34,6 +34,7 @@
     "@angular/router": "^20.3.0",
     "@angular/ssr": "^20.3.4",
     "@clerk/clerk-js": "^6.12.1",
+    "@clerk/ui": "^1.15.0",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

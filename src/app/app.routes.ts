@@ -21,5 +21,19 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./pages/dashboard/dashboard.route').then(m => m.DASHBOARD_ROUTES),
   },
+  {
+    path: 'cliente',
+    canMatch: [canMatchPortal],
+    data: { portal: 'cliente' },
+    loadComponent: () =>
+      import('./pages/cliente/cliente').then(m => m.ClienteComponent),
+  },
+  {
+    path: 'deposito',
+    canMatch: [canMatchPortal],
+    data: { portal: 'deposito' },
+    loadComponent: () =>
+      import('./pages/deposito/deposito').then(m => m.DepositoComponent),
+  },
   { path: '**', redirectTo: 'home' },
 ];

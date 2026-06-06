@@ -1,109 +1,171 @@
-// src/app/auth/auth.service.ts
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { LoginRequest, LoginResponse, RefreshResponse, MeDTO } from './auth.models';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { finalize, shareReplay, tap } from 'rxjs/operators';
+
+import { MeDTO, PortalType, TipoPortal } from './auth.models';
+import { environment } from '../../environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private accessToken: string | null = null;
-  private readonly KEY_LOCAL  = 'ls_access_token';
-  private readonly KEY_SESSION = 'ls_access_token_session';
-  private readonly EXP_SKEW_SEC = 30; 
+  private readonly meUrl = `${environment.apiUrl}/me`;
 
-  constructor(
-    private http: HttpClient,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    if (isPlatformBrowser(this.platformId)) {
-      this.accessToken =
-        localStorage.getItem(this.KEY_LOCAL) ??
-        sessionStorage.getItem(this.KEY_SESSION);
-    } else {
-      this.accessToken = null;
+  private currentUserSubject = new BehaviorSubject<MeDTO | null>(null);
+  currentUser$ = this.currentUserSubject.asObservable();
+
+  private meRequest$?: Observable<MeDTO>;
+
+  constructor(private http: HttpClient) {}
+
+  loadMe(force = false): Observable<MeDTO> {
+    const currentUser = this.currentUserSubject.value;
+
+    if (!force && currentUser) {
+      return of(currentUser);
     }
-  }
 
-  login(req: LoginRequest) { return this.http.post<LoginResponse>('/api/auth/login', req); }
-  logout() { this.clearToken(); return this.http.post<void>('/api/auth/logout', {}); }
-  refresh() { return this.http.post<RefreshResponse>('/api/auth/refresh', {}); }
-  me() { return this.http.get<MeDTO>('/api/me'); }
-
-  setAccessToken(token: string, remember = false) {
-    this.accessToken = token;
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem(this.KEY_LOCAL);
-      sessionStorage.removeItem(this.KEY_SESSION);
-      if (remember) localStorage.setItem(this.KEY_LOCAL, token);
-      else sessionStorage.setItem(this.KEY_SESSION, token);
+    if (!force && this.meRequest$) {
+      return this.meRequest$;
     }
+
+    this.meRequest$ = this.http.get<MeDTO>(this.meUrl).pipe(
+      tap(me => this.currentUserSubject.next(me)),
+      finalize(() => {
+        this.meRequest$ = undefined;
+      }),
+      shareReplay(1)
+    );
+
+    return this.meRequest$;
   }
 
-  clearToken() {
-    this.accessToken = null;
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem(this.KEY_LOCAL);
-      sessionStorage.removeItem(this.KEY_SESSION);
+  getCurrentUser(): MeDTO | null {
+    return this.currentUserSubject.value;
+  }
+
+  clearSession(): void {
+    this.currentUserSubject.next(null);
+    this.meRequest$ = undefined;
+  }
+
+  canAccessPortal(me: MeDTO | null, portal: PortalType): boolean {
+    if (!me) {
+      return false;
     }
+
+    if (this.isAdmin(me)) {
+      return true;
+    }
+
+    const expectedTipoPortal = this.getTipoPortalForPortal(portal);
+
+    if (me.tipoPortal === expectedTipoPortal) {
+      return true;
+    }
+
+    const roles = this.normalizeRoles(me.roles);
+
+    if (portal === 'transportista') {
+      return roles.includes('TRANSPORTISTA') || roles.includes('ADMIN_TRANSPORTISTA');
+    }
+
+    if (portal === 'cliente') {
+      return roles.includes('CLIENTE');
+    }
+
+    if (portal === 'deposito') {
+      return roles.includes('DEPOSITO');
+    }
+
+    return false;
   }
 
-  getAccessToken(): string | null { return this.accessToken; }
+  getDefaultRouteForPortal(portal: PortalType): string {
+    if (portal === 'cliente') {
+      return '/cliente';
+    }
 
-  // ✅ En SSR, no intentes calcular expiración ni refrescar
-  isTokenExpiredSoon(): boolean {
-    if (!isPlatformBrowser(this.platformId)) return false;
-    if (!this.accessToken) return true;
-    const exp = this.getTokenExp(this.accessToken);
-    if (!exp) return true;
-    const nowSec = Math.floor(Date.now() / 1000);
-    return exp - nowSec <= this.EXP_SKEW_SEC;
+    if (portal === 'deposito') {
+      return '/deposito';
+    }
+
+    return '/dashboard';
   }
 
-  private getTokenExp(token: string): number | null {
-    try {
-      const payloadB64 = token.split('.')[1];
-      const json = this.safeB64Decode(payloadB64);
-      const payload = JSON.parse(json || '{}');
-      return typeof payload.exp === 'number' ? payload.exp : null;
-    } catch { return null; }
+  getForbiddenMessage(portal: PortalType): string {
+    if (portal === 'cliente') {
+      return 'Tu usuario no tiene permisos para ingresar al portal de Cliente.';
+    }
+
+    if (portal === 'deposito') {
+      return 'Tu usuario no tiene permisos para ingresar al portal de Deposito.';
+    }
+
+    return 'Tu usuario no tiene permisos para ingresar al portal de Transportista.';
   }
 
-  // ✅ atob seguro para browser/SSR
-  private safeB64Decode(input: string): string {
-    try {
-      if (typeof atob === 'function') return atob(input);
-      // @ts-ignore SSR/Node
-      if (typeof Buffer !== 'undefined') return Buffer.from(input, 'base64').toString('utf-8');
-    } catch { /* ignore */ }
-    return '';
+  clearToken(): void {
+    this.clearSession();
   }
 
-    // en AuthService
+  getAccessToken(): string | null {
+    return null;
+  }
+
   getTid(): number | null {
-    const p = this.getPayload();
-    return p && typeof p.tid !== 'undefined'
-      ? Number(p.tid)
-      : null;
+    return this.currentUserSubject.value?.transportistaId ?? null;
   }
 
   getUsername(): string | null {
-    const p = this.getPayload();
-    return p?.username ?? null;
+    return this.currentUserSubject.value?.email ?? null;
   }
 
   getRoles(): string[] {
-    const p = this.getPayload();
-    const r = p?.roles;
-    return Array.isArray(r) ? r.map(String) : [];
+    return this.currentUserSubject.value?.roles ?? [];
   }
 
-  // --- privados ---
-  private getPayload(): any | null {
-    if (!this.accessToken) return null;
-    try {
-      const b64 = this.accessToken.split('.')[1];
-      const json = this.safeB64Decode(b64);
-      return json ? JSON.parse(json) : null;
-    } catch { return null; }
+  private isAdmin(me: MeDTO): boolean {
+    const roles = this.normalizeRoles(me.roles);
+    return me.tipoPortal === 'ADMIN' || roles.includes('ADMIN');
+  }
+
+  private getTipoPortalForPortal(portal: PortalType): TipoPortal {
+    if (portal === 'cliente') {
+      return 'CLIENTE';
+    }
+
+    if (portal === 'deposito') {
+      return 'DEPOSITO';
+    }
+
+    return 'TRANSPORTISTA';
+  }
+
+  private normalizeRoles(roles: string[]): string[] {
+    return roles.map(role => role.replace(/^ROLE_/, '').toUpperCase());
+  }
+
+  getDefaultRouteForUser(me: MeDTO | null): string {
+    if (!me) {
+      return '/home';
+    }
+
+    if (me.tipoPortal === 'ADMIN') {
+      return '/dashboard';
+    }
+
+    if (me.tipoPortal === 'TRANSPORTISTA') {
+      return '/dashboard';
+    }
+
+    if (me.tipoPortal === 'CLIENTE') {
+      return '/cliente';
+    }
+
+    if (me.tipoPortal === 'DEPOSITO') {
+      return '/deposito';
+    }
+
+    return '/home';
   }
 }

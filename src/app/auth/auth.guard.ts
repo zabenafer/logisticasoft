@@ -3,9 +3,8 @@ import { CanActivateFn, CanMatchFn, Route, Router, UrlSegment, UrlTree } from '@
 import { from, Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { AuthService } from './auth.service';
 import { ClerkAuthService } from './clerk-auth.service';
-import { AuthSessionService } from './auth-session.service';
+import { AuthService } from './auth.service';
 import { PortalType } from './auth.models';
 
 type GuardResult = boolean | UrlTree | Observable<boolean | UrlTree>;
@@ -29,84 +28,58 @@ function buildLoginRedirect(router: Router, portal: PortalType, redirectUrl: str
   return router.createUrlTree(['/login'], {
     queryParams: {
       portal,
-      redirectUrl
-    }
+      redirectUrl,
+    },
   });
 }
 
-function buildAccessDeniedRedirect(router: Router): UrlTree {
-  return router.createUrlTree(['/home'], {
+function buildForbiddenRedirect(router: Router, portal: PortalType): UrlTree {
+  return router.createUrlTree(['/login'], {
     queryParams: {
-      reason: 'access-denied'
-    }
+      portal,
+      reason: 'forbidden',
+    },
   });
-}
-
-function loadUserAndValidatePortal(
-  session: AuthSessionService,
-  router: Router,
-  portal: PortalType
-): Observable<boolean | UrlTree> {
-  return session.loadCurrentUser().pipe(
-    map(me => {
-      if (session.canAccessPortal(me, portal)) {
-        return true;
-      }
-
-      return buildAccessDeniedRedirect(router);
-    }),
-    catchError(err => {
-      console.error('Error cargando /api/me desde guard:', err);
-      session.clear();
-      return of(buildAccessDeniedRedirect(router));
-    })
-  );
 }
 
 function checkPortalAccess(portal: PortalType, redirectUrl: string): GuardResult {
-  const auth = inject(AuthService);
   const clerkAuth = inject(ClerkAuthService);
-  const session = inject(AuthSessionService);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  const localToken = auth.getAccessToken();
   const toLogin = buildLoginRedirect(router, portal, redirectUrl);
 
-  /**
-   * 1) Login local actual
-   */
-  if (localToken) {
-    if (!auth.isTokenExpiredSoon()) {
-      return loadUserAndValidatePortal(session, router, portal);
-    }
-
-    return auth.refresh().pipe(
-      switchMap(res => {
-        auth.setAccessToken(res.accessToken);
-        return loadUserAndValidatePortal(session, router, portal);
-      }),
-      catchError(err => {
-        console.error('Error refrescando token desde guard:', err);
-        session.clear();
-        return of(toLogin);
-      })
-    );
-  }
-
-  /**
-   * 2) Login Clerk
-   */
   return from(clerkAuth.isSignedIn()).pipe(
     switchMap(isSignedIn => {
       if (!isSignedIn) {
         return of(toLogin);
       }
 
-      return loadUserAndValidatePortal(session, router, portal);
+      return authService.loadMe().pipe(
+        map(me => {
+          if (authService.canAccessPortal(me, portal)) {
+            return true;
+          }
+
+          return buildForbiddenRedirect(router, portal);
+        }),
+        catchError(err => {
+          console.error('Error cargando /me desde guard:', err);
+
+          return of(
+            router.createUrlTree(['/login'], {
+              queryParams: {
+                portal,
+                reason: 'session-expired',
+                redirectUrl,
+              },
+            })
+          );
+        })
+      );
     }),
     catchError(err => {
-      console.error('Error validando sesión Clerk desde guard:', err);
-      session.clear();
+      console.error('Error validando sesion Clerk desde guard:', err);
       return of(toLogin);
     })
   );
@@ -129,10 +102,6 @@ export const canActivatePortal: CanActivateFn = (route, state) => {
   return checkPortalAccess('transportista', state.url);
 };
 
-/**
- * Compatibilidad por si todavía tenés alguna ruta usando canMatchAuth/canActivateAuth.
- * Por defecto protege como portal transportista.
- */
 export const canMatchAuth: CanMatchFn = (route, segments) => {
   const redirectUrl = buildUrlFromSegments(segments);
 
