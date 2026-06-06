@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 
-import { AuthSessionService } from './auth-session.service';
 import { SharedImports } from '../material.module';
-import { AuthService } from './auth.service';
 import { ClerkAuthService } from './clerk-auth.service';
-import { MeDTO, PortalType } from './auth.models';
+import { PortalType } from './auth.models';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-auth-callback',
@@ -16,24 +15,36 @@ import { MeDTO, PortalType } from './auth.models';
   template: `
     <div class="callback-page">
       <div class="callback-card">
-      <div class="callback-icon" [class.error]="!procesando && !!errorMsg">
-        <mat-icon>{{ !procesando && errorMsg ? 'error' : 'verified_user' }}</mat-icon>
-      </div>
+        <div class="callback-icon" [class.error]="!procesando && !!errorMsg">
+          <mat-icon>{{ !procesando && errorMsg ? 'error' : 'verified_user' }}</mat-icon>
+        </div>
 
-      <ng-container *ngIf="procesando; else resultadoBox">
-        <mat-spinner diameter="42"></mat-spinner>
-        <h2>Validando tu cuenta...</h2>
-        <p>Estamos verificando tus permisos de acceso.</p>
-      </ng-container>
+        <ng-container *ngIf="procesando; else resultadoBox">
+          <mat-spinner diameter="42"></mat-spinner>
+          <h2>Validando tu cuenta...</h2>
+          <p>Estamos verificando tu sesion de Clerk.</p>
+        </ng-container>
 
-      <ng-template #resultadoBox>
-        <h2>No pudimos iniciar sesión</h2>
-        <p>{{ errorMsg }}</p>
+        <ng-template #resultadoBox>
+          <h2>{{ accessDenied ? 'Acceso no permitido' : 'No pudimos iniciar sesion' }}</h2>
+          <p>{{ errorMsg }}</p>
 
-        <a mat-flat-button routerLink="/home" class="home-button">
-          Volver al inicio
-        </a>
-      </ng-template>
+          <div class="callback-actions" *ngIf="accessDenied; else retryLogin">
+            <button mat-flat-button class="home-button" type="button" (click)="irPortalCorrecto()">
+              Ir a mi portal
+            </button>
+
+            <button mat-stroked-button type="button" class="secondary-button" (click)="cerrarSesionReintentar()">
+              Ingresar con otra cuenta
+            </button>
+          </div>
+
+          <ng-template #retryLogin>
+            <a mat-flat-button routerLink="/login" class="home-button">
+              Volver a intentar
+            </a>
+          </ng-template>
+        </ng-template>
       </div>
     </div>
   `,
@@ -108,21 +119,36 @@ import { MeDTO, PortalType } from './auth.models';
       padding: 0 22px;
       min-height: 44px;
     }
+
+    .callback-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .secondary-button {
+      border-radius: 12px !important;
+      font-weight: 700;
+      min-height: 44px;
+    }
   `]
 })
 export class AuthCallbackComponent implements OnInit {
   procesando = true;
   errorMsg = '';
-  portal: PortalType = 'cliente';
+  portal: PortalType = 'transportista';
+
+  accessDenied = false;
+  portalPermitidoUrl = '/home';
 
   private callbackIniciado = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private auth: AuthService,
     private clerkAuth: ClerkAuthService,
-    private session: AuthSessionService
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -136,10 +162,7 @@ export class AuthCallbackComponent implements OnInit {
 
   private async procesarCallback(): Promise<void> {
     const portalParam = this.route.snapshot.queryParamMap.get('portal');
-
-    const source = this.route.snapshot.queryParamMap.get('source');
-    const vieneDeClerk = source === 'clerk';
-    const vieneDeLocal = source === 'local';
+    const redirectUrl = this.route.snapshot.queryParamMap.get('redirectUrl');
 
     if (
       portalParam === 'cliente' ||
@@ -147,72 +170,58 @@ export class AuthCallbackComponent implements OnInit {
       portalParam === 'deposito'
     ) {
       this.portal = portalParam;
-    } else {
-      this.portal = 'cliente';
     }
 
     this.procesando = true;
     this.errorMsg = '';
 
     try {
-      if (vieneDeClerk) {
-        this.auth.clearToken();
+      const token = await this.clerkAuth.waitForToken(60, 250);
 
-        const token = await this.clerkAuth.waitForToken(60, 250);
-
-        if (!token) {
-          this.errorMsg = 'No se pudo obtener la sesión de Google. Volvé a intentarlo.';
-          this.procesando = false;
-          return;
-        }
-      }
-
-      if (!vieneDeClerk && !vieneDeLocal) {
-        this.errorMsg = 'Origen de autenticación inválido.';
+      if (!token) {
+        this.errorMsg = 'No se pudo obtener la sesion de Clerk. Volve a intentarlo.';
         this.procesando = false;
         return;
       }
 
-      const me = await firstValueFrom(this.session.loadCurrentUser());
+      const me = await firstValueFrom(this.authService.loadMe(true));
 
-      const redirigio = await this.resolverIngresoPorPortal(me);
-
-      if (!redirigio) {
+      if (!this.authService.canAccessPortal(me, this.portal)) {
+        this.accessDenied = true;
+        this.portalPermitidoUrl = this.authService.getDefaultRouteForUser(me);
+        this.errorMsg = this.authService.getForbiddenMessage(this.portal);
         this.procesando = false;
+        return;
       }
 
-    } catch (err: any) {
+      await this.router.navigateByUrl(this.getSafeRedirectUrl(redirectUrl));
+    } catch (err) {
       console.error(err);
-
-      if (err?.status === 401) {
-        this.errorMsg = 'Tu cuenta todavía no está habilitada en Enviux.';
-      } else {
-        this.errorMsg = 'No se pudo validar tu usuario. Volvé a intentarlo.';
-      }
-
+      this.errorMsg = 'No se pudo validar tu usuario. Volve a intentarlo.';
       this.procesando = false;
     }
   }
 
-  private async resolverIngresoPorPortal(me: MeDTO): Promise<boolean> {
-    const route = this.session.getDefaultRouteFor(me, this.portal);
+  irPortalCorrecto(): void {
+    void this.router.navigateByUrl(this.portalPermitidoUrl);
+  }
 
-    if (!route) {
-      this.errorMsg = this.session.getAccessDeniedMessage(me, this.portal);
-      return false;
+  async cerrarSesionReintentar(): Promise<void> {
+    await this.clerkAuth.signOut();
+    this.authService.clearSession();
+
+    await this.router.navigate(['/login'], {
+      queryParams: {
+        portal: this.portal,
+      },
+    });
+  }
+
+  private getSafeRedirectUrl(redirectUrl: string | null): string {
+    if (redirectUrl?.startsWith('/') && !redirectUrl.startsWith('//')) {
+      return redirectUrl;
     }
 
-    if (me.tipoPortal === 'CLIENTE') {
-      this.errorMsg = 'Tu cuenta cliente está validada, pero todavía falta habilitar el panel de clientes.';
-      return false;
-    }
-
-    if (me.tipoPortal === 'DEPOSITO') {
-      this.errorMsg = 'Tu cuenta depósito está validada, pero todavía falta habilitar el panel de depósitos.';
-      return false;
-    }
-
-    await this.router.navigate(route);
-    return true;
+    return this.authService.getDefaultRouteForPortal(this.portal);
   }
 }

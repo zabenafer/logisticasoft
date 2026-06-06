@@ -12,7 +12,7 @@ export class AuthSessionService {
   constructor(private auth: AuthService) {}
 
   loadCurrentUser(): Observable<MeDTO> {
-    return this.auth.me().pipe(
+    return this.auth.loadMe().pipe(
       tap(me => this.currentUserSubject.next(me))
     );
   }

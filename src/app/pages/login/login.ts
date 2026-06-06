@@ -1,21 +1,27 @@
-import { Component, inject, DestroyRef, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { SharedImports } from '../../material.module';
-import { FormsModule } from '@angular/forms';
+import {
+  AfterViewInit,
+  Component,
+  DestroyRef,
+  ElementRef,
+  Inject,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../auth/auth.service';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { environment } from '../../../environment';
+
+import { SharedImports } from '../../material.module';
 import { ClerkAuthService } from '../../auth/clerk-auth.service';
 import { PortalType } from '../../auth/auth.models';
-
-const LAST_USER_KEY = 'ls_last_user';
 
 interface PortalConfig {
   tipo: PortalType;
   titulo: string;
   subtitulo: string;
-  botonTexto: string;
   icono: string;
   colorPrincipal: string;
   colorSuave: string;
@@ -27,29 +33,23 @@ interface PortalConfig {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [SharedImports, CommonModule, FormsModule, RouterLink],
+  imports: [SharedImports, CommonModule, RouterLink],
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
-export class LoginComponent implements OnInit {
-  usuario = '';
-  password = '';
-  showPassword = false;
-  recordarme = false;
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('clerkSignIn') clerkSignIn?: ElementRef<HTMLDivElement>;
 
-  loadingLocal = false;
-  loadingClerk = false;
-  validandoClerk = false;
-
+  loadingClerk = true;
   errorMsg = '';
-  portal: PortalType = 'cliente';
+  portal: PortalType = 'transportista';
+  private mountTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly portalConfigs: Record<PortalType, PortalConfig> = {
     cliente: {
       tipo: 'cliente',
       titulo: 'Acceso de Cliente',
-      subtitulo: 'Ingresá para ver tus envíos',
-      botonTexto: 'Ingresar como cliente',
+      subtitulo: 'Ingresa para ver tus envios',
       icono: 'person',
       colorPrincipal: '#2563eb',
       colorSuave: '#eff6ff',
@@ -60,8 +60,7 @@ export class LoginComponent implements OnInit {
     transportista: {
       tipo: 'transportista',
       titulo: 'Acceso de Transportista',
-      subtitulo: 'Ingresá para gestionar tus entregas',
-      botonTexto: 'Ingresar como transportista',
+      subtitulo: 'Ingresa para gestionar tus entregas',
       icono: 'local_shipping',
       colorPrincipal: '#16a34a',
       colorSuave: '#f0fdf4',
@@ -71,9 +70,8 @@ export class LoginComponent implements OnInit {
     },
     deposito: {
       tipo: 'deposito',
-      titulo: 'Acceso de Depósito',
-      subtitulo: 'Ingresá para administrar el depósito',
-      botonTexto: 'Ingresar como depósito',
+      titulo: 'Acceso de Deposito',
+      subtitulo: 'Ingresa para administrar el deposito',
       icono: 'warehouse',
       colorPrincipal: '#7c3aed',
       colorSuave: '#f5f3ff',
@@ -83,14 +81,14 @@ export class LoginComponent implements OnInit {
     }
   };
 
-  portalActual: PortalConfig = this.portalConfigs['cliente'];
+  portalActual: PortalConfig = this.portalConfigs.transportista;
 
+  private viewReady = false;
+  private mountedElement: HTMLDivElement | null = null;
   private destroyRef = inject(DestroyRef);
   private readonly isBrowser: boolean;
 
   constructor(
-    private router: Router,
-    private auth: AuthService,
     private clerkAuth: ClerkAuthService,
     private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -99,21 +97,6 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.clerkAuth.preload();
-
-    if (environment.prefillLogin) {
-      this.usuario = environment.devLoginUser;
-      this.password = environment.devLoginPass;
-      this.recordarme = true;
-    } else if (this.isBrowser) {
-      const last = localStorage.getItem(LAST_USER_KEY);
-
-      if (last) {
-        this.usuario = last;
-        this.recordarme = true;
-      }
-    }
-
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
@@ -127,89 +110,81 @@ export class LoginComponent implements OnInit {
         ) {
           this.portal = portalParam;
         } else {
-          this.portal = 'cliente';
+          this.portal = 'transportista';
         }
 
         this.portalActual = this.portalConfigs[this.portal];
-
-        this.errorMsg =
-          reason === 'session-expired'
-            ? 'Tu sesión expiró por inactividad. Iniciá sesión de nuevo.'
-            : '';
-      });
-  }
-
-  onLogin(): void {
-    if (!this.usuario || !this.password) {
-      return;
-    }
-
-    if (this.loadingLocal || this.loadingClerk || this.validandoClerk) {
-      return;
-    }
-
-    this.loadingLocal = true;
-    this.errorMsg = '';
-
-    this.auth.login({ usernameOrEmail: this.usuario, password: this.password })
-      .subscribe({
-        next: res => {
-          this.auth.setAccessToken(res.accessToken, this.recordarme);
-
-          if (this.isBrowser) {
-            if (this.recordarme) {
-              localStorage.setItem(LAST_USER_KEY, this.usuario);
-            } else {
-              localStorage.removeItem(LAST_USER_KEY);
-            }
-          }
-
-          this.router.navigate(['/auth/callback'], {
-            queryParams: {
-              portal: this.portal,
-              source: 'local'
-            }
-          });
-        },
-        error: err => {
-          this.errorMsg = 'Credenciales inválidas';
-          console.error(err);
-          this.loadingLocal = false;
+        this.errorMsg = this.getReasonMessage(reason);
+        if (this.viewReady) {
+          this.scheduleMountClerkSignIn();
         }
       });
   }
 
-  async onLoginClerk(): Promise<void> {
-    if (this.loadingLocal || this.loadingClerk || this.validandoClerk) {
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    this.scheduleMountClerkSignIn();
+  }
+
+  ngOnDestroy(): void {
+    if (this.mountTimeoutId) {
+      clearTimeout(this.mountTimeoutId);
+    }
+
+    if (this.mountedElement) {
+      void this.clerkAuth.unmountSignIn(this.mountedElement);
+    }
+  }
+
+  private async mountClerkSignIn(): Promise<void> {
+    if (!this.isBrowser || !this.clerkSignIn?.nativeElement) {
+      this.loadingClerk = false;
       return;
     }
 
     this.loadingClerk = true;
-    this.validandoClerk = true;
-    this.errorMsg = '';
+    this.errorMsg = this.errorMsg || '';
 
     try {
-      this.auth.clearToken();
-
-      const yaTieneSesionClerk = await this.clerkAuth.isSignedIn();
-
-      if (yaTieneSesionClerk) {
-        await this.router.navigate(['/auth/callback'], {
-          queryParams: {
-            portal: this.portal,
-            source: 'clerk'
-          }
-        });
-        return;
+      if (this.mountedElement) {
+        await this.clerkAuth.unmountSignIn(this.mountedElement);
       }
 
-      await this.clerkAuth.signIn(this.portal);
-
+      this.mountedElement = this.clerkSignIn.nativeElement;
+      await this.clerkAuth.mountSignIn(this.mountedElement, this.portal);
     } catch (err) {
-      console.error(err);
-      this.errorMsg = 'No se pudo iniciar sesión con Google.';
+      console.error('[Clerk] Error real al cargar o montar SignIn:', err);
+      const detail = err instanceof Error ? err.message : String(err);
+      this.errorMsg = `No se pudo cargar Clerk. ${detail}`;
+    } finally {
       this.loadingClerk = false;
-      this.validandoClerk = false;
     }
+  }
+  private scheduleMountClerkSignIn(): void {
+    if (!this.isBrowser) {
+      this.loadingClerk = false;
+      return;
+    }
+
+    if (this.mountTimeoutId) {
+      clearTimeout(this.mountTimeoutId);
+    }
+
+    this.mountTimeoutId = setTimeout(() => {
+      this.mountTimeoutId = null;
+      void this.mountClerkSignIn();
+    });
+  }
+
+  private getReasonMessage(reason: string | null): string {
+    if (reason === 'session-expired') {
+      return 'Tu sesion expiro o no se pudo validar tu usuario. Inicia sesion de nuevo.';
+    }
+
+    if (reason === 'forbidden') {
+      return 'Tu usuario no tiene permisos para ingresar a este portal.';
+    }
+
+    return '';
   }
 }
