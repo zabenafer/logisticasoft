@@ -1,25 +1,16 @@
 import { Component, computed, signal } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import {
+  ClienteEnvio,
+  ClienteEnvioService,
+  EstadoEnvio,
+  EstadoFiltro
+} from '../../services/cliente-envio.service';
+import { ClienteEnvioDetalleDialogComponent } from './cliente-envio-detalle-dialog/cliente-envio-detalle-dialog';
 import { Router } from '@angular/router';
 import { SharedImports } from '../../material.module';
 import { ClerkAuthService } from '../../auth/clerk-auth.service';
 import { AuthSessionService } from '../../auth/auth-session.service';
-
-type EstadoEnvio = 'Pendiente' | 'En camino' | 'Entregado' | 'Cancelado';
-type EstadoFiltro = 'Todos' | EstadoEnvio;
-
-interface ClienteEnvio {
-  id: number;
-  numeroSeguimiento: string;
-  estado: EstadoEnvio;
-  origen: string;
-  destino: string;
-  direccionOrigen: string;
-  direccionDestino: string;
-  fechaCreacion: string;
-  ultimaActualizacion: string;
-  horaEntregaDesde: string;
-  horaEntregaHasta: string;
-}
 
 @Component({
   selector: 'app-cliente',
@@ -47,47 +38,7 @@ export class ClienteComponent {
   readonly filtrosAbiertos = signal(false);
   readonly estadoSeleccionado = signal<EstadoFiltro>('Todos');
 
-  readonly envios = signal<ClienteEnvio[]>([
-    {
-      id: 1,
-      numeroSeguimiento: 'MNZ00000021',
-      estado: 'En camino',
-      origen: 'Villa María, Córdoba',
-      destino: 'Córdoba Capital, Córdoba',
-      direccionOrigen: 'Av. Alem 123',
-      direccionDestino: 'Bv. San Juan 850',
-      fechaCreacion: '09/06/2026',
-      ultimaActualizacion: '09/06/2026 14:30',
-      horaEntregaDesde: '10:00',
-      horaEntregaHasta: '14:00'
-    },
-    {
-      id: 2,
-      numeroSeguimiento: 'MNZ00000018',
-      estado: 'Entregado',
-      origen: 'Villa Nueva, Córdoba',
-      destino: 'Rosario, Santa Fe',
-      direccionOrigen: 'San Martín 455',
-      direccionDestino: 'Mitre 1200',
-      fechaCreacion: '08/06/2026',
-      ultimaActualizacion: '08/06/2026 18:20',
-      horaEntregaDesde: '15:00',
-      horaEntregaHasta: '19:00'
-    },
-    {
-      id: 3,
-      numeroSeguimiento: 'MNZ00000016',
-      estado: 'Pendiente',
-      origen: 'Villa María, Córdoba',
-      destino: 'Río Cuarto, Córdoba',
-      direccionOrigen: 'Entre Ríos 320',
-      direccionDestino: 'Belgrano 750',
-      fechaCreacion: '07/06/2026',
-      ultimaActualizacion: '07/06/2026 11:10',
-      horaEntregaDesde: '09:00',
-      horaEntregaHasta: '13:00'
-    }
-  ]);
+  readonly envios = signal<ClienteEnvio[]>([]);
 
   readonly resumen = computed(() => {
     const envios = this.envios();
@@ -126,8 +77,12 @@ export class ClienteComponent {
   constructor(
     private readonly router: Router,
     private clerkAuth: ClerkAuthService,
-    private session: AuthSessionService
-  ) {}
+    private session: AuthSessionService,
+    private clienteEnvioService: ClienteEnvioService,
+    private dialog: MatDialog
+  ) {
+    this.envios.set(this.clienteEnvioService.listarMisEnvios());
+  }
 
   onNumeroSeguimientoBusquedaChange(valor: string): void {
     this.numeroSeguimientoBusqueda.set(valor);
@@ -135,16 +90,14 @@ export class ClienteComponent {
   }
 
   buscarEnvioPorNumero(): void {
-    const numeroBuscado = this.normalizar(this.numeroSeguimientoBusqueda());
+    const numeroBuscado = this.numeroSeguimientoBusqueda();
 
-    if (!numeroBuscado) {
+    if (!numeroBuscado.trim()) {
       this.mensajeBusquedaEnvio.set('Ingresá un número de seguimiento.');
       return;
     }
 
-    const envioEncontrado = this.envios().find(envio =>
-      this.normalizar(envio.numeroSeguimiento) === numeroBuscado
-    );
+    const envioEncontrado = this.clienteEnvioService.buscarPorNumeroSeguimiento(numeroBuscado);
 
     if (!envioEncontrado) {
       this.mensajeBusquedaEnvio.set(
@@ -153,7 +106,8 @@ export class ClienteComponent {
       return;
     }
 
-    this.verDetalle(envioEncontrado);
+    this.mensajeBusquedaEnvio.set('');
+    this.abrirDetalle(envioEncontrado);
   }
 
   toggleFiltros(): void {
@@ -169,7 +123,19 @@ export class ClienteComponent {
   }
 
   verDetalle(envio: ClienteEnvio): void {
-    this.router.navigate(['/cliente/envios', envio.id]);
+    this.abrirDetalle(envio);
+  }
+
+  private abrirDetalle(envio: ClienteEnvio): void {
+    this.dialog.open(ClienteEnvioDetalleDialogComponent, {
+      data: envio,
+      width: '860px',
+      maxWidth: 'calc(100vw - 32px)',
+      maxHeight: 'calc(100dvh - 32px)',
+      panelClass: 'cliente-envio-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false
+    });
   }
 
   estadoClass(estado: EstadoEnvio): string {

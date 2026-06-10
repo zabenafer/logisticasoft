@@ -1,0 +1,100 @@
+<div class="dialog-page">
+  <header class="dialog-header">
+    <div>
+      <p class="eyebrow">Detalle del envío</p>
+      <h2>{{ envio.numeroSeguimiento }}</h2>
+    </div>
+
+    <button mat-icon-button type="button" aria-label="Cerrar" (click)="cerrar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <section class="status-card">
+    <div>
+      <span>Estado actual</span>
+      <strong>{{ envio.estado }}</strong>
+    </div>
+
+    <span class="status-pill" [ngClass]="estadoClass(envio.estado)">
+      {{ envio.estado }}
+    </span>
+  </section>
+
+  <section class="detail-grid">
+    <article class="detail-card">
+      <div class="detail-icon">
+        <mat-icon>trip_origin</mat-icon>
+      </div>
+
+      <div>
+        <span>Origen</span>
+        <strong>{{ envio.origen }}</strong>
+        <p>{{ envio.direccionOrigen }}</p>
+      </div>
+    </article>
+
+    <article class="detail-card">
+      <div class="detail-icon">
+        <mat-icon>place</mat-icon>
+      </div>
+
+      <div>
+        <span>Destino</span>
+        <strong>{{ envio.destino }}</strong>
+        <p>{{ envio.direccionDestino }}</p>
+      </div>
+    </article>
+
+    <article class="detail-card">
+      <div class="detail-icon">
+        <mat-icon>schedule</mat-icon>
+      </div>
+
+      <div>
+        <span>Entrega estimada</span>
+        <strong>{{ envio.horaEntregaDesde }} - {{ envio.horaEntregaHasta }}</strong>
+        <p>Franja horaria informada por el transportista.</p>
+      </div>
+    </article>
+
+    <article class="detail-card">
+      <div class="detail-icon">
+        <mat-icon>local_shipping</mat-icon>
+      </div>
+
+      <div>
+        <span>Transportista</span>
+        <strong>{{ envio.transportista }}</strong>
+        <p>Última actualización: {{ envio.ultimaActualizacion }}</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="timeline-section">
+    <div class="timeline-title">
+      <h3>Historial del envío</h3>
+      <p>Estados por los que fue pasando tu envío.</p>
+    </div>
+
+    <div class="timeline">
+      <article
+        class="timeline-item"
+        *ngFor="let evento of envio.eventos; trackBy: trackByEventoId"
+      >
+        <div class="timeline-marker" [ngClass]="estadoClass(evento.estado)">
+          <mat-icon>check</mat-icon>
+        </div>
+
+        <div class="timeline-content">
+          <div class="timeline-content-header">
+            <strong>{{ evento.estado }}</strong>
+            <span>{{ evento.fechaHora }}</span>
+          </div>
+
+          <p>{{ evento.observacion }}</p>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
