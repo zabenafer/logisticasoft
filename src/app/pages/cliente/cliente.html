@@ -1,2 +1,281 @@
-<h1>Portal Cliente</h1>
-<p>Sección en construcción.</p>
+<div class="cliente-page">
+  <header class="cliente-topbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+
+      <div class="brand-text">
+        <strong>Enviux</strong>
+        <span>Portal cliente</span>
+      </div>
+    </div>
+
+    <nav class="cliente-nav">
+      <a class="nav-link active" href="#mis-envios">Mis envíos</a>
+      <a class="nav-link" href="#buscar-envio">Buscar envío</a>
+
+      <button mat-stroked-button class="request-button" disabled>
+        <mat-icon>add</mat-icon>
+        Solicitar envío
+        <span>Próximamente</span>
+      </button>
+
+      <button
+        type="button"
+        class="nav-link logout-link"
+        (click)="onLogout($event)"
+        [disabled]="logoutLoading"
+      >
+        <mat-icon>logout</mat-icon>
+        <span>{{ logoutLoading ? 'Cerrando...' : 'Cerrar sesión' }}</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="cliente-container">
+    <section class="hero-card">
+      <div>
+        <p class="eyebrow">Panel de seguimiento</p>
+        <h1>Hola, {{ nombreCliente }}</h1>
+        <p class="hero-description">
+          Acá podés consultar el estado de tus envíos.
+        </p>
+      </div>
+
+      <div class="hero-badge">
+        <mat-icon>verified_user</mat-icon>
+        <span>Solo tus envíos</span>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card">
+        <div class="summary-icon total">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+
+        <div>
+          <span>Total</span>
+          <strong>{{ resumen().total }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon progress">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+
+        <div>
+          <span>En camino</span>
+          <strong>{{ resumen().enCamino }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon pending">
+          <mat-icon>schedule</mat-icon>
+        </div>
+
+        <div>
+          <span>Pendientes</span>
+          <strong>{{ resumen().pendientes }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon delivered">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+
+        <div>
+          <span>Entregados</span>
+          <strong>{{ resumen().entregados }}</strong>
+        </div>
+      </article>
+    </section>
+
+    <section class="search-card" id="buscar-envio">
+      <div class="filters-header">
+        <div>
+          <h2>Buscar envío</h2>
+          <p>
+            Ingresá un número de seguimiento para consultar el detalle de uno de tus envíos.
+          </p>
+        </div>
+      </div>
+
+      <div class="search-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Número de seguimiento</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            type="text"
+            placeholder="Ej: MNZ00000021"
+            [value]="numeroSeguimientoBusqueda()"
+            (input)="onNumeroSeguimientoBusquedaChange($any($event.target).value)"
+            (keyup.enter)="buscarEnvioPorNumero()"
+          />
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          class="search-button"
+          type="button"
+          [disabled]="!numeroSeguimientoBusqueda().trim()"
+          (click)="buscarEnvioPorNumero()"
+        >
+          <mat-icon>search</mat-icon>
+          Buscar
+        </button>
+      </div>
+
+      <p class="search-message" *ngIf="mensajeBusquedaEnvio()">
+        {{ mensajeBusquedaEnvio() }}
+      </p>
+    </section>
+
+    <section class="envios-section" id="mis-envios">
+      <div class="section-title">
+        <div>
+          <h2>Mis envíos</h2>
+          <p>Listado de envíos asociados a tu cuenta.</p>
+        </div>
+
+        <div class="section-actions">
+          <span class="results-count">{{ textoCantidadEnvios() }}</span>
+
+          <button
+            mat-stroked-button
+            type="button"
+            class="filters-toggle"
+            (click)="toggleFiltros()"
+          >
+            <mat-icon>filter_list</mat-icon>
+            Filtros
+            <mat-icon>
+              {{ filtrosAbiertos() ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="advanced-filters" *ngIf="filtrosAbiertos()">
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select
+            [value]="estadoSeleccionado()"
+            (selectionChange)="onEstadoChange($event.value)"
+          >
+            <mat-option *ngFor="let estado of estados" [value]="estado">
+              {{ estado }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="disabled-filter">
+          <mat-label>Fecha</mat-label>
+          <mat-select disabled>
+            <mat-option value="ultimos30">Últimos 30 días</mat-option>
+          </mat-select>
+          <mat-hint>Próximamente</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="disabled-filter">
+          <mat-label>Ordenar por</mat-label>
+          <mat-select disabled>
+            <mat-option value="ultimaActualizacion">
+              Última actualización
+            </mat-option>
+          </mat-select>
+          <mat-hint>Próximamente</mat-hint>
+        </mat-form-field>
+
+        <button
+          mat-button
+          class="clear-button"
+          type="button"
+          [disabled]="!filtrosActivos()"
+          (click)="limpiarFiltros()"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+
+      <div class="envios-list" *ngIf="enviosFiltrados().length > 0; else emptyState">
+        <article
+          class="envio-card"
+          *ngFor="let envio of enviosFiltrados(); trackBy: trackByEnvioId"
+        >
+          <div class="envio-content">
+            <div class="envio-header">
+              <div>
+                <span class="label">Número de envío</span>
+                <h3>{{ envio.numeroSeguimiento }}</h3>
+              </div>
+
+              <span class="status-pill" [ngClass]="estadoClass(envio.estado)">
+                {{ envio.estado }}
+              </span>
+            </div>
+
+            <div class="route">
+              <div>
+                <span>Origen</span>
+                <strong>{{ envio.origen }}</strong>
+                <small>{{ envio.direccionOrigen }}</small>
+              </div>
+
+              <mat-icon>arrow_forward</mat-icon>
+
+              <div>
+                <span>Destino</span>
+                <strong>{{ envio.destino }}</strong>
+                <small>{{ envio.direccionDestino }}</small>
+              </div>
+            </div>
+
+            <div class="envio-meta">
+              <div>
+                <span>Creado</span>
+                <strong>{{ envio.fechaCreacion }}</strong>
+              </div>
+
+              <div>
+                <span>Entrega estimada</span>
+                <strong>{{ envio.horaEntregaDesde }} - {{ envio.horaEntregaHasta }}</strong>
+              </div>
+
+              <div>
+                <span>Última actualización</span>
+                <strong>{{ envio.ultimaActualizacion }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="envio-actions">
+            <button mat-flat-button class="detail-button" (click)="verDetalle(envio)">
+              <mat-icon>visibility</mat-icon>
+              Ver detalle
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <mat-icon>search_off</mat-icon>
+          <h3>No encontramos envíos</h3>
+          <p>
+            No hay envíos asociados a tu cuenta con los filtros seleccionados.
+          </p>
+
+          <button mat-stroked-button type="button" (click)="limpiarFiltros()">
+            Limpiar filtros
+          </button>
+        </div>
+      </ng-template>
+    </section>
+  </main>
+</div>

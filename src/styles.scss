@@ -1,15 +1,7 @@
 @use '@angular/material' as mat;
 
 :root {
-  --app-toolbar-h: 64px;
   --app-footer-h: 56px;
-}
-
-@media (max-width: 599px) {
-  :root {
-    --app-toolbar-h: 56px;
-    --app-footer-h: 56px;
-  }
 }
 
 html {
@@ -57,27 +49,15 @@ body {
   font-weight: 600;
 }
 
-.navbar-fixed {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
 .app-main {
   overflow: visible;
-  padding-top: var(--app-toolbar-h);
-  min-height: calc(100dvh - var(--app-toolbar-h));
+  padding-top: 0;
+  min-height: calc(100dvh - var(--app-footer-h));
   display: flow-root;
 }
 
-.app-main.no-offset {
-  padding-top: 0;
-}
-
 .app-main.no-footer {
-  min-height: calc(100dvh - var(--app-toolbar-h));
+  min-height: 100dvh;
 }
 
 .app-main.no-scroll-main {
