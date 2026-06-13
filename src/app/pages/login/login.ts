@@ -9,6 +9,7 @@ import {
   PLATFORM_ID,
   ViewChild,
   inject,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -91,6 +92,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private clerkAuth: ClerkAuthService,
     private route: ActivatedRoute,
+    private readonly cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -121,6 +123,11 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
+  private setLoadingClerk(value: boolean): void {
+    this.loadingClerk = value;
+    this.cdr.detectChanges();
+  }
+
   ngAfterViewInit(): void {
     this.viewReady = true;
     this.scheduleMountClerkSignIn();
@@ -138,11 +145,11 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private async mountClerkSignIn(): Promise<void> {
     if (!this.isBrowser || !this.clerkSignIn?.nativeElement) {
-      this.loadingClerk = false;
+      this.setLoadingClerk(false);
       return;
     }
 
-    this.loadingClerk = true;
+    this.setLoadingClerk(true);
     this.errorMsg = this.errorMsg || '';
 
     try {
@@ -157,12 +164,13 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       const detail = err instanceof Error ? err.message : String(err);
       this.errorMsg = `No se pudo cargar Clerk. ${detail}`;
     } finally {
-      this.loadingClerk = false;
+      this.setLoadingClerk(false);
     }
   }
+
   private scheduleMountClerkSignIn(): void {
     if (!this.isBrowser) {
-      this.loadingClerk = false;
+      setTimeout(() => this.setLoadingClerk(false));
       return;
     }
 

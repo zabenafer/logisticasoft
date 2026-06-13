@@ -1,9 +1,11 @@
 export interface EnvioEventoDTO {
   id?: number;
-  fechaHora?: string;          // ISO (LocalDateTime del backend)
-  estado?: string;             // texto del evento
+  fechaHora?: string;
+  estadoId?: number;
+  estado?: string;
   descripcion?: string;
-  ubicacion?: string;          // opcional
+  observacion?: string;
+  ubicacion?: string;
 }
 
 export interface EnvioDTO {
