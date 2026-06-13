@@ -12,8 +12,23 @@
     </div>
 
     <nav class="cliente-nav">
-      <a class="nav-link active" href="#mis-envios">Mis envíos</a>
-      <a class="nav-link" href="#buscar-envio">Buscar envío</a>
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="seccionActiva() === 'mis-envios'"
+        (click)="irASeccion('mis-envios')"
+      >
+        Mis envíos
+      </button>
+
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="seccionActiva() === 'buscar-envio'"
+        (click)="irASeccion('buscar-envio')"
+      >
+        Buscar envío
+      </button>
 
       <button mat-stroked-button class="request-button" disabled>
         <mat-icon>add</mat-icon>
@@ -123,11 +138,11 @@
           mat-flat-button
           class="search-button"
           type="button"
-          [disabled]="!numeroSeguimientoBusqueda().trim()"
+          [disabled]="!numeroSeguimientoBusqueda().trim() || loadingEnvios() || loadingDetalleEnvio()"
           (click)="buscarEnvioPorNumero()"
         >
-          <mat-icon>search</mat-icon>
-          Buscar
+          <mat-icon>{{ loadingDetalleEnvio() ? 'hourglass_empty' : 'search' }}</mat-icon>
+          {{ loadingDetalleEnvio() ? 'Buscando...' : 'Buscar' }}
         </button>
       </div>
 
@@ -167,6 +182,7 @@
           <mat-select
             [value]="estadoSeleccionado()"
             (selectionChange)="onEstadoChange($event.value)"
+            [disabled]="loadingEnvios() || !!errorEnvios()"
           >
             <mat-option *ngFor="let estado of estados" [value]="estado">
               {{ estado }}
@@ -196,14 +212,33 @@
           mat-button
           class="clear-button"
           type="button"
-          [disabled]="!filtrosActivos()"
+          [disabled]="!filtrosActivos() || loadingEnvios()"
           (click)="limpiarFiltros()"
         >
           Limpiar filtros
         </button>
       </div>
 
-      <div class="envios-list" *ngIf="enviosFiltrados().length > 0; else emptyState">
+      <div class="loading-state" *ngIf="loadingEnvios()">
+        <mat-icon>hourglass_empty</mat-icon>
+        <span>Cargando tus envíos...</span>
+      </div>
+
+      <div class="error-state" *ngIf="errorEnvios() && !loadingEnvios()">
+        <div>
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorEnvios() }}</span>
+        </div>
+
+        <button mat-stroked-button type="button" (click)="cargarEnvios()">
+          Reintentar
+        </button>
+      </div>
+
+      <div
+        class="envios-list"
+        *ngIf="!loadingEnvios() && !errorEnvios() && enviosFiltrados().length > 0; else emptyState"
+      >
         <article
           class="envio-card"
           *ngFor="let envio of enviosFiltrados(); trackBy: trackByEnvioId"
@@ -255,7 +290,12 @@
           </div>
 
           <div class="envio-actions">
-            <button mat-flat-button class="detail-button" (click)="verDetalle(envio)">
+            <button
+              mat-flat-button
+              class="detail-button"
+              [disabled]="loadingDetalleEnvio()"
+              (click)="verDetalle(envio)"
+            >
               <mat-icon>visibility</mat-icon>
               Ver detalle
             </button>
@@ -264,14 +304,19 @@
       </div>
 
       <ng-template #emptyState>
-        <div class="empty-state">
+        <div class="empty-state" *ngIf="!loadingEnvios() && !errorEnvios()">
           <mat-icon>search_off</mat-icon>
           <h3>No encontramos envíos</h3>
           <p>
             No hay envíos asociados a tu cuenta con los filtros seleccionados.
           </p>
 
-          <button mat-stroked-button type="button" (click)="limpiarFiltros()">
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="!filtrosActivos()"
+            (click)="limpiarFiltros()"
+          >
             Limpiar filtros
           </button>
         </div>
