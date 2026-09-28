@@ -1,2 +1,342 @@
-<h1>Portal Depósito</h1>
-<p>Sección en construcción.</p>
+<div class="deposito-page">
+  <header class="deposito-topbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <mat-icon>warehouse</mat-icon>
+      </div>
+
+      <div class="brand-text">
+        <strong>Enviux</strong>
+        <span>Portal depósito</span>
+      </div>
+    </div>
+
+    <nav class="deposito-nav">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="seccionActiva() === 'dashboard'"
+        (click)="irASeccion('dashboard')"
+      >
+        Dashboard
+      </button>
+
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="seccionActiva() === 'paquetes'"
+        (click)="irASeccion('paquetes')"
+      >
+        Paquetes
+      </button>
+
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="seccionActiva() === 'recepcionar'"
+        (click)="irASeccion('recepcionar')"
+      >
+        Recepcionar paquete
+      </button>
+
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="seccionActiva() === 'transportistas'"
+        (click)="irASeccion('transportistas')"
+      >
+        Transportistas
+      </button>
+
+      <button
+        type="button"
+        class="nav-link logout-link"
+        (click)="onLogout($event)"
+        [disabled]="logoutLoading"
+      >
+        <mat-icon>logout</mat-icon>
+        <span>{{ logoutLoading ? 'Cerrando...' : 'Cerrar sesión' }}</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="deposito-container">
+    <section class="hero-card" id="dashboard">
+      <div>
+        <p class="eyebrow">Dashboard</p>
+        <h1>Hola, Depósito</h1>
+        <p class="hero-description">
+          Gestioná los paquetes recibidos, pendientes de retiro y enviados a transportistas.
+        </p>
+      </div>
+
+      <div class="hero-badge">
+        <mat-icon>verified</mat-icon>
+        <span>Operación de depósito</span>
+      </div>
+    </section>
+
+    <section class="summary-grid" aria-label="Resumen del depósito">
+      <article class="summary-card">
+        <div class="summary-icon stored">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+
+        <div>
+          <span>En depósito</span>
+          <strong>{{ resumen().enDeposito }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon pending">
+          <mat-icon>schedule</mat-icon>
+        </div>
+
+        <div>
+          <span>Pendientes de retiro</span>
+          <strong>{{ resumen().pendientesRetiro }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon picked">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+
+        <div>
+          <span>Retirados por transportista</span>
+          <strong>{{ resumen().retiradosTransportista }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon today">
+          <mat-icon>today</mat-icon>
+        </div>
+
+        <div>
+          <span>Recibidos hoy</span>
+          <strong>{{ resumen().recibidosHoy }}</strong>
+        </div>
+      </article>
+    </section>
+
+    <section class="receive-card" id="recepcionar">
+      <div class="receive-content">
+        <div class="receive-icon">
+          <mat-icon>add_box</mat-icon>
+        </div>
+
+        <div>
+          <p class="eyebrow">Recepcionar paquete</p>
+          <h2>Registrar un nuevo ingreso</h2>
+          <p>
+            Próximamente vas a poder crear envíos desde depósito, asignar transportista y
+            registrar la primera novedad operativa.
+          </p>
+        </div>
+      </div>
+
+      <button
+        mat-flat-button
+        class="receive-button"
+        type="button"
+        disabled
+      >
+        <mat-icon>add</mat-icon>
+        Recepcionar paquete
+        <span class="coming-soon">Próximamente</span>
+      </button>
+    </section>
+
+    <section class="paquetes-section" id="paquetes">
+      <div class="section-title">
+        <div>
+          <h2>Paquetes del depósito</h2>
+          <p>Listado mock de paquetes recibidos y operados desde {{ nombreDeposito }}.</p>
+        </div>
+
+        <div class="section-actions">
+          <span class="results-count">{{ textoCantidadPaquetes() }}</span>
+
+          <button
+            mat-stroked-button
+            type="button"
+            class="filters-toggle"
+            (click)="toggleFiltros()"
+          >
+            <mat-icon>filter_list</mat-icon>
+            Filtros
+            <mat-icon>
+              {{ filtrosAbiertos() ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="advanced-filters" *ngIf="filtrosAbiertos()">
+        <mat-form-field appearance="outline">
+          <mat-label>Estado operativo</mat-label>
+          <mat-select
+            [value]="estadoSeleccionado()"
+            (selectionChange)="onEstadoChange($event.value)"
+            [disabled]="loadingEnvios() || !!errorEnvios()"
+          >
+            <mat-option *ngFor="let estado of estados" [value]="estado">
+              {{ estado }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="disabled-filter">
+          <mat-label>Transportista</mat-label>
+          <mat-select disabled>
+            <mat-option value="todos">Todos los transportistas</mat-option>
+          </mat-select>
+          <mat-hint>Próximamente</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="disabled-filter">
+          <mat-label>Fecha</mat-label>
+          <mat-select disabled>
+            <mat-option value="hoy">Recibidos hoy</mat-option>
+          </mat-select>
+          <mat-hint>Próximamente</mat-hint>
+        </mat-form-field>
+
+        <button
+          mat-button
+          class="clear-button"
+          type="button"
+          [disabled]="!filtrosActivos() || loadingEnvios()"
+          (click)="limpiarFiltros()"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+
+      <div class="loading-state" *ngIf="loadingEnvios()">
+        <mat-icon>hourglass_empty</mat-icon>
+        <span>Cargando paquetes del depósito...</span>
+      </div>
+
+      <div class="error-state" *ngIf="errorEnvios() && !loadingEnvios()">
+        <div>
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorEnvios() }}</span>
+        </div>
+
+        <button mat-stroked-button type="button" (click)="cargarEnvios()">
+          Reintentar
+        </button>
+      </div>
+
+      <div
+        class="paquetes-list"
+        *ngIf="!loadingEnvios() && !errorEnvios() && enviosFiltrados().length > 0; else emptyState"
+      >
+        <article
+          class="paquete-card"
+          *ngFor="let envio of enviosFiltrados(); trackBy: trackByEnvioId"
+        >
+          <div class="paquete-content">
+            <div class="paquete-header">
+              <div>
+                <span class="label">Número de seguimiento</span>
+                <h3>{{ envio.numeroSeguimiento }}</h3>
+              </div>
+
+              <span class="status-pill" [ngClass]="estadoClass(envio.estado)">
+                {{ envio.estado }}
+              </span>
+            </div>
+
+            <div class="paquete-grid">
+              <div>
+                <span>Cliente</span>
+                <strong>{{ envio.cliente }}</strong>
+              </div>
+
+              <div>
+                <span>Transportista asignado</span>
+                <strong>{{ envio.transportista }}</strong>
+              </div>
+
+              <div>
+                <span>Origen</span>
+                <strong>{{ envio.origen }}</strong>
+              </div>
+
+              <div>
+                <span>Destino</span>
+                <strong>{{ envio.destino }}</strong>
+              </div>
+
+              <div>
+                <span>Última actualización</span>
+                <strong>{{ envio.ultimaActualizacion }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="paquete-actions">
+            <button
+              mat-flat-button
+              class="detail-button"
+              type="button"
+              [disabled]="loadingDetalleEnvio()"
+              (click)="verDetalle(envio)"
+            >
+              <mat-icon>visibility</mat-icon>
+              Ver detalle
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="empty-state" *ngIf="!loadingEnvios() && !errorEnvios()">
+          <mat-icon>inventory_2</mat-icon>
+          <h3>No encontramos paquetes</h3>
+          <p>No hay paquetes con los filtros seleccionados.</p>
+
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="!filtrosActivos()"
+            (click)="limpiarFiltros()"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="transportistas-section" id="transportistas">
+      <div class="section-title">
+        <div>
+          <h2>Transportistas asociados</h2>
+          <p>Vista operativa mock de los transportistas con paquetes vinculados.</p>
+        </div>
+      </div>
+
+      <div class="transportistas-grid">
+        <article
+          class="transportista-card"
+          *ngFor="let transportista of transportistas(); trackBy: trackByTransportista"
+        >
+          <div class="transportista-icon">
+            <mat-icon>local_shipping</mat-icon>
+          </div>
+
+          <div>
+            <strong>{{ transportista.nombre }}</strong>
+            <span>{{ transportista.total }} paquetes vinculados</span>
+            <small>{{ transportista.pendientes }} pendientes de retiro</small>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</div>

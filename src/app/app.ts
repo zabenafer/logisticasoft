@@ -41,10 +41,11 @@ export class App {
     const isSeguimiento = url.startsWith('/seguimiento');
     const isDashboard = url.startsWith('/dashboard');
     const isCliente = url.startsWith('/cliente');
+    const isDeposito = url.startsWith('/deposito');
 
     this.showFooter = isHome || isSeguimiento;
 
-    this.noFooter = isDashboard || isLogin || isCliente;
+    this.noFooter = isDashboard || isLogin || isCliente || isDeposito;
     this.noScrollMain = isLogin;
 
     if (this.isBrowser) {

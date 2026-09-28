@@ -1,0 +1,673 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+.deposito-page {
+  min-height: 100vh;
+  background: #f4f0ff;
+}
+
+.deposito-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  min-height: 72px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #ddd6fe;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  box-shadow: 0 10px 22px rgba(124, 58, 237, 0.24);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+
+  strong {
+    font-size: 17px;
+    color: #1e293b;
+  }
+
+  span {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #64748b;
+  }
+}
+
+.deposito-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#dashboard,
+#paquetes,
+#recepcionar,
+#transportistas {
+  scroll-margin-top: 96px;
+}
+
+.nav-link {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  &:hover,
+  &.active {
+    color: #7c3aed;
+    background: #f5f3ff;
+  }
+}
+
+.logout-link {
+  &:hover {
+    color: #7c3aed;
+    background: #fef2f2;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.65;
+  }
+}
+
+.deposito-container {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.hero-card {
+  padding: 32px;
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background:
+    radial-gradient(circle at right center, rgba(139, 92, 246, 0.24), transparent 28%),
+    linear-gradient(90deg, #ffffff 0%, #f8f5ff 40%, #ece2ff 100%);
+  border: 1px solid #d9ccff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+
+  h1 {
+    margin: 6px 0 8px;
+    font-size: 42px;
+    line-height: 1.05;
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7c3aed;
+}
+
+.hero-description {
+  max-width: 680px;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.hero-badge {
+  padding: 12px 16px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  color: #6d28d9;
+  background: #ede9fe;
+  font-weight: 700;
+}
+
+.summary-grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.summary-card {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  border: 1px solid #e6dcff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+
+  span {
+    display: block;
+    font-size: 14px;
+    line-height: 1.35;
+    color: #64748b;
+  }
+
+  strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 28px;
+    color: #1e293b;
+  }
+}
+
+.summary-icon,
+.receive-icon,
+.transportista-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #7c3aed;
+  background: #ede9fe;
+}
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+}
+
+.receive-card,
+.paquetes-section,
+.transportistas-section {
+  margin-top: 24px;
+  padding: 24px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #e6dcff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.receive-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.receive-content {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  h2 {
+    margin: 6px 0 6px;
+    color: #1e293b;
+  }
+
+  p:not(.eyebrow) {
+    max-width: 650px;
+    margin: 0;
+    color: #64748b;
+    line-height: 1.5;
+  }
+}
+
+.receive-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+}
+
+.receive-button {
+  min-height: 44px;
+  border-radius: 999px !important;
+
+  &:disabled {
+    background: #ede9fe !important;
+    color: #7c3aed !important;
+    opacity: 1;
+  }
+
+  .coming-soon {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6d28d9;
+    background: #ddd6fe;
+  }
+}
+
+.section-title {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    color: #1e293b;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #64748b;
+  }
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.results-count {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.filters-toggle {
+  height: 40px;
+  border-radius: 999px !important;
+  border-color: #ddd6fe !important;
+  color: #7c3aed !important;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+.advanced-filters {
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: start;
+  background: #faf7ff;
+  border: 1px solid #ddd6fe;
+}
+
+.disabled-filter {
+  opacity: 0.72;
+}
+
+.clear-button {
+  height: 56px;
+  color: #7c3aed !important;
+}
+
+.loading-state,
+.error-state {
+  margin-bottom: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #ddd6fe;
+  color: #475569;
+}
+
+.error-state {
+  justify-content: space-between;
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+}
+
+.paquetes-list {
+  display: grid;
+  gap: 16px;
+}
+
+.paquete-card {
+  padding: 20px;
+  border-radius: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  background: #ffffff;
+  border: 1px solid #ede9fe;
+
+  &:hover {
+    border-color: #c4b5fd;
+  }
+}
+
+.paquete-content,
+.paquete-header > div,
+.paquete-grid > div,
+.transportista-card > div:last-child {
+  min-width: 0;
+}
+
+.paquete-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  h3 {
+    margin: 4px 0 0;
+    font-size: 21px;
+    color: #1e293b;
+    overflow-wrap: anywhere;
+  }
+}
+
+.label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.paquete-grid {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #ede9fe;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+
+  span {
+    display: block;
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1.35;
+    color: #1e293b;
+    overflow-wrap: anywhere;
+  }
+}
+
+.detail-button {
+  border-radius: 999px !important;
+  background: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+.status-pill {
+  padding: 7px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: #6d28d9;
+  background: #ede9fe;
+
+  &.status-pending {
+    color: #92400e;
+    background: #fef3c7;
+  }
+
+  &.status-picked-up,
+  &.status-transit {
+    color: #0f766e;
+    background: #ccfbf1;
+  }
+
+  &.status-ready,
+  &.status-delivered {
+    color: #166534;
+    background: #dcfce7;
+  }
+
+  &.status-cancelled {
+    color: #991b1b;
+    background: #fee2e2;
+  }
+}
+
+.empty-state {
+  padding: 48px 24px;
+  border-radius: 22px;
+  text-align: center;
+  background: #faf7ff;
+  border: 1px dashed #c4b5fd;
+
+  mat-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 52px;
+    color: #a78bfa;
+  }
+
+  h3 {
+    margin: 14px 0 6px;
+    color: #1e293b;
+  }
+
+  p {
+    margin: 0 0 18px;
+    color: #64748b;
+  }
+}
+
+.transportistas-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.transportista-card {
+  padding: 16px;
+  border-radius: 18px;
+  display: flex;
+  gap: 12px;
+  background: #faf7ff;
+  border: 1px solid #ddd6fe;
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: #1e293b;
+  }
+
+  span,
+  small {
+    margin-top: 4px;
+  }
+
+  span {
+    color: #64748b;
+  }
+
+  small {
+    display: block;
+    color: #7c3aed;
+    font-weight: 700;
+  }
+}
+
+.transportista-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+}
+
+@media (max-width: 1040px) {
+  .deposito-topbar {
+    height: auto;
+    padding: 16px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .deposito-nav {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .summary-grid,
+  .transportistas-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .advanced-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .clear-button {
+    height: 44px;
+    justify-self: flex-start;
+  }
+
+  .paquete-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .paquete-card {
+    grid-template-columns: 1fr;
+  }
+
+  .paquete-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .deposito-container {
+    width: min(100% - 24px, 1180px);
+    padding-top: 20px;
+  }
+
+  .hero-card,
+  .receive-card,
+  .section-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hero-card {
+    padding: 24px;
+
+    h1 {
+      font-size: 32px;
+    }
+  }
+
+  .hero-badge {
+    white-space: normal;
+  }
+
+  .summary-grid,
+  .transportistas-grid,
+  .advanced-filters,
+  .paquete-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .receive-card,
+  .paquetes-section,
+  .transportistas-section {
+    padding: 18px;
+  }
+
+  .receive-content {
+    align-items: flex-start;
+  }
+
+  .receive-button {
+    width: 100%;
+
+    span {
+      display: none;
+    }
+  }
+
+  .paquete-header {
+    flex-direction: column;
+  }
+
+  .status-pill {
+    white-space: normal;
+  }
+
+  .detail-button {
+    width: 100%;
+  }
+
+  .error-state {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
