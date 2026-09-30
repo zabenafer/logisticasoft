@@ -1,4 +1,5 @@
 export type EstadoDepositoEnvio =
+  | 'Pendiente de recepción en depósito'
   | 'Recibido en depósito'
   | 'Pendiente de retiro'
   | 'Retirado por transportista'

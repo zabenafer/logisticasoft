@@ -40,19 +40,18 @@ export class DepositoEnvioService {
       id: 2,
       numeroSeguimiento: 'ENVX-DEP-00082',
       cliente: 'Marcos Núñez',
-      estado: 'Pendiente de retiro',
+      estado: 'Pendiente de recepción en depósito',
       transportista: 'Rápido Sur',
-      depositoActual: 'Depósito Palermo',
+      depositoActual: 'Pendiente de ingreso en Depósito Palermo',
       origen: 'Belgrano, CABA',
       direccionOrigen: 'Moldes 1840',
       destino: 'La Plata, Buenos Aires',
       direccionDestino: 'Calle 50 720',
-      fechaRecepcion: '15/09/2026, 10:25',
-      ultimaActualizacion: '15/09/2026, 10:42',
-      recibidoHoy: true,
+      fechaRecepcion: '-',
+      ultimaActualizacion: '15/09/2026, 10:25',
+      recibidoHoy: false,
       eventos: [
-        this.evento(201, 'Recibido en depósito', '15/09/2026, 10:25', 'Ingreso registrado por operador de depósito.'),
-        this.evento(202, 'Pendiente de retiro', '15/09/2026, 10:42', 'Asignado a Rápido Sur para retiro vespertino.')
+        this.evento(201, 'Pendiente de recepción en depósito', '15/09/2026, 10:25', 'Envío creado y pendiente de recepción física en depósito.')
       ]
     },
     {
@@ -176,7 +175,7 @@ export class DepositoEnvioService {
     },
     {
       id: 9,
-      numeroSeguimiento: 'ENVX-DEP-00088',
+      numeroSeguimiento: 'ENVX-DEP-00089',
       cliente: 'Valentina Moya',
       estado: 'Cancelado',
       transportista: 'Correo Argentino',
@@ -195,7 +194,7 @@ export class DepositoEnvioService {
     },
     {
       id: 10,
-      numeroSeguimiento: 'ENVX-DEP-00088',
+      numeroSeguimiento: 'ENVX-DEP-00090',
       cliente: 'Valentina Moya',
       estado: 'Cancelado',
       transportista: 'Mondez',
@@ -214,7 +213,7 @@ export class DepositoEnvioService {
     },
     {
       id: 11,
-      numeroSeguimiento: 'ENVX-DEP-00088',
+      numeroSeguimiento: 'ENVX-DEP-00091',
       cliente: 'Valentina Moya',
       estado: 'Cancelado',
       transportista: 'Sin asignar',
@@ -233,7 +232,7 @@ export class DepositoEnvioService {
     },
     {
       id: 12,
-      numeroSeguimiento: 'ENVX-DEP-00088',
+      numeroSeguimiento: 'ENVX-DEP-00092',
       cliente: 'Valentina Moya',
       estado: 'Cancelado',
       transportista: 'Sin asignar',
@@ -252,7 +251,7 @@ export class DepositoEnvioService {
     },
     {
       id: 13,
-      numeroSeguimiento: 'ENVX-DEP-00088',
+      numeroSeguimiento: 'ENVX-DEP-00093',
       cliente: 'Valentina Moya',
       estado: 'Cancelado',
       transportista: 'Sin asignar',
@@ -285,6 +284,50 @@ export class DepositoEnvioService {
     return of(this.clonarEnvio(envio));
   }
 
+  buscarPorNumeroSeguimiento(numeroSeguimiento: string): Observable<DepositoEnvio | null> {
+    const numeroNormalizado = this.normalizarNumeroSeguimiento(numeroSeguimiento);
+    const envio = this.envios.find(
+      item => this.normalizarNumeroSeguimiento(item.numeroSeguimiento) === numeroNormalizado
+    );
+
+    return of(envio ? this.clonarEnvio(envio) : null);
+  }
+
+  recepcionarEnvioExistente(
+    numeroSeguimiento: string,
+    depositoActual: string
+  ): Observable<DepositoEnvio> {
+    const numeroNormalizado = this.normalizarNumeroSeguimiento(numeroSeguimiento);
+    const envio = this.envios.find(
+      item => this.normalizarNumeroSeguimiento(item.numeroSeguimiento) === numeroNormalizado
+    );
+
+    if (!envio) {
+      return throwError(() => new Error('No encontramos un envío con ese número de seguimiento.'));
+    }
+
+    if (!this.puedeRecepcionarseEnOrigen(envio)) {
+      return throwError(() => new Error(this.mensajeRecepcionBloqueada(envio.estado)));
+    }
+
+    const fechaHora = this.formatearFechaHora(new Date());
+
+    envio.estado = 'Recibido en depósito';
+    envio.depositoActual = depositoActual;
+    envio.fechaRecepcion = fechaHora;
+    envio.ultimaActualizacion = fechaHora;
+    envio.recibidoHoy = true;
+    envio.eventos.push({
+      id: this.siguienteEventoId(envio),
+      estado: 'Recibido en depósito',
+      fechaHora,
+      descripcion: 'Paquete recibido físicamente en el depósito.',
+      operador: 'Depósito'
+    });
+
+    return of(this.clonarEnvio(envio));
+  }
+
   private evento(
     id: number,
     estado: EstadoDepositoEnvio,
@@ -305,5 +348,50 @@ export class DepositoEnvioService {
       ...envio,
       eventos: envio.eventos.map(evento => ({ ...evento }))
     };
+  }
+
+  private puedeRecepcionarseEnOrigen(envio: DepositoEnvio): boolean {
+    return envio.estado === 'Pendiente de recepción en depósito';
+  }
+
+  private mensajeRecepcionBloqueada(estado: EstadoDepositoEnvio): string {
+    switch (estado) {
+      case 'Recibido en depósito':
+        return 'Este envío ya fue recibido en depósito.';
+      case 'Pendiente de retiro':
+        return 'Este envío ya se encuentra en depósito y está pendiente de retiro.';
+      case 'Retirado por transportista':
+        return 'Este envío ya fue retirado por el transportista.';
+      case 'En tránsito':
+        return 'Este envío ya se encuentra en tránsito.';
+      case 'Recibido en depósito destino':
+        return 'Este envío ya fue recibido en el depósito destino.';
+      case 'Listo para retirar':
+        return 'Este envío ya está listo para retirar.';
+      case 'Entregado':
+        return 'Este envío ya fue entregado.';
+      case 'Cancelado':
+        return 'Este envío está cancelado.';
+      default:
+        return 'Este envío no puede recepcionarse en depósito.';
+    }
+  }
+
+  private siguienteEventoId(envio: DepositoEnvio): number {
+    return Math.max(...envio.eventos.map(evento => evento.id), 0) + 1;
+  }
+
+  private normalizarNumeroSeguimiento(numeroSeguimiento: string): string {
+    return numeroSeguimiento.trim().toUpperCase();
+  }
+
+  private formatearFechaHora(fecha: Date): string {
+    return new Intl.DateTimeFormat('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(fecha);
   }
 }

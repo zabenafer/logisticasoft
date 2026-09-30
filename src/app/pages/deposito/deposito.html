@@ -130,23 +130,22 @@
 
         <div>
           <p class="eyebrow">Recepcionar paquete</p>
-          <h2>Registrar un nuevo ingreso</h2>
+          <h2>Recepcionar envío existente</h2>
           <p>
-            Próximamente vas a poder crear envíos desde depósito, asignar transportista y
-            registrar la primera novedad operativa.
+            Buscá un número de seguimiento ya emitido y registrá la recepción física en
+            {{ nombreDeposito }}.
           </p>
         </div>
       </div>
 
       <button
         mat-flat-button
-        class="receive-button"
+        class="receive-button detail-button"
         type="button"
-        disabled
+        (click)="abrirRecepcion()"
       >
         <mat-icon>add</mat-icon>
         Recepcionar paquete
-        <span class="coming-soon">Próximamente</span>
       </button>
     </section>
 
@@ -232,13 +231,13 @@
         </button>
       </div>
 
-      <div
-        class="paquetes-list"
+      <ng-container
         *ngIf="!loadingEnvios() && !errorEnvios() && enviosFiltrados().length > 0; else emptyState"
       >
+        <div class="paquetes-list">
         <article
           class="paquete-card"
-          *ngFor="let envio of enviosFiltrados(); trackBy: trackByEnvioId"
+          *ngFor="let envio of enviosPaginados(); trackBy: trackByEnvioId"
         >
           <div class="paquete-content">
             <div class="paquete-header">
@@ -295,6 +294,51 @@
         </article>
       </div>
 
+      <div class="section-actions paquetes-pagination" *ngIf="totalPaginasPaquetes() > 1">
+        <span class="results-count pagination-summary">{{ textoPaginacionPaquetes() }}</span>
+
+        <nav class="section-actions pagination-controls" aria-label="Paginacion de paquetes">
+          <button
+            type="button"
+            class="nav-link page-button arrow-button"
+            [disabled]="paginaPaquetesActual() === 1"
+            (click)="paginaPaquetesAnterior()"
+            aria-label="Pagina anterior"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <ng-container *ngFor="let item of paginasPaquetes(); trackBy: trackByPaginacionItem">
+            <span class="pagination-ellipsis" *ngIf="item.page === null; else paquetePageButton">
+              {{ item.label }}
+            </span>
+
+            <ng-template #paquetePageButton>
+              <button
+                type="button"
+                class="nav-link page-button"
+                [class.active]="item.page === paginaPaquetesActual()"
+                [attr.aria-current]="item.page === paginaPaquetesActual() ? 'page' : null"
+                (click)="irAPaginaPaquetes(item.page)"
+              >
+                {{ item.label }}
+              </button>
+            </ng-template>
+          </ng-container>
+
+          <button
+            type="button"
+            class="nav-link page-button arrow-button"
+            [disabled]="paginaPaquetesActual() === totalPaginasPaquetes()"
+            (click)="paginaPaquetesSiguiente()"
+            aria-label="Pagina siguiente"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </nav>
+      </div>
+      </ng-container>
+
       <ng-template #emptyState>
         <div class="empty-state" *ngIf="!loadingEnvios() && !errorEnvios()">
           <mat-icon>inventory_2</mat-icon>
@@ -324,7 +368,7 @@
       <div class="transportistas-grid">
         <article
           class="transportista-card"
-          *ngFor="let transportista of transportistas(); trackBy: trackByTransportista"
+          *ngFor="let transportista of transportistasPaginados(); trackBy: trackByTransportista"
         >
           <div class="transportista-icon">
             <mat-icon>local_shipping</mat-icon>
@@ -336,6 +380,32 @@
             <small>{{ transportista.pendientes }} pendientes de retiro</small>
           </div>
         </article>
+      </div>
+
+      <div class="section-actions transportistas-pagination" *ngIf="totalPaginasTransportistas() > 1">
+        <button
+          type="button"
+          class="nav-link page-button arrow-button compact"
+          [disabled]="paginaTransportistasActual() === 1"
+          (click)="paginaTransportistasAnterior()"
+          aria-label="Pagina anterior de transportistas"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <span class="results-count compact-page-indicator">
+          {{ paginaTransportistasActual() }} / {{ totalPaginasTransportistas() }}
+        </span>
+
+        <button
+          type="button"
+          class="nav-link page-button arrow-button compact"
+          [disabled]="paginaTransportistasActual() === totalPaginasTransportistas()"
+          (click)="paginaTransportistasSiguiente()"
+          aria-label="Pagina siguiente de transportistas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
       </div>
     </section>
   </main>

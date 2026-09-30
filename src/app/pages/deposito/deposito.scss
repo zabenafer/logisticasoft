@@ -86,12 +86,6 @@
   font-weight: 500;
   color: #334155;
 
-  mat-icon {
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
-  }
-
   &:hover,
   &.active {
     color: #7c3aed;
@@ -100,11 +94,6 @@
 }
 
 .logout-link {
-  &:hover {
-    color: #7c3aed;
-    background: #fef2f2;
-  }
-
   &:disabled {
     cursor: default;
     opacity: 0.65;
@@ -267,16 +256,6 @@
     color: #7c3aed !important;
     opacity: 1;
   }
-
-  .coming-soon {
-    margin-left: 6px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #6d28d9;
-    background: #ddd6fe;
-  }
 }
 
 .section-title {
@@ -319,11 +298,6 @@
   border-color: #ddd6fe !important;
   color: #7c3aed !important;
 
-  mat-icon {
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
-  }
 }
 
 .advanced-filters {
@@ -336,10 +310,6 @@
   align-items: start;
   background: #faf7ff;
   border: 1px solid #ddd6fe;
-}
-
-.disabled-filter {
-  opacity: 0.72;
 }
 
 .clear-button {
@@ -377,6 +347,11 @@
   gap: 16px;
 }
 
+.paquetes-pagination {
+  margin-top: 18px;
+  justify-content: space-between;
+}
+
 .paquete-card {
   padding: 20px;
   border-radius: 22px;
@@ -385,10 +360,6 @@
   gap: 20px;
   background: #ffffff;
   border: 1px solid #ede9fe;
-
-  &:hover {
-    border-color: #c4b5fd;
-  }
 }
 
 .paquete-content,
@@ -489,13 +460,6 @@
   background: #faf7ff;
   border: 1px dashed #c4b5fd;
 
-  mat-icon {
-    width: 52px;
-    height: 52px;
-    font-size: 52px;
-    color: #a78bfa;
-  }
-
   h3 {
     margin: 14px 0 6px;
     color: #1e293b;
@@ -550,6 +514,15 @@
   width: 40px;
   height: 40px;
   border-radius: 14px;
+}
+
+.transportistas-pagination {
+  margin-top: 16px;
+}
+
+.pagination-controls {
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 @media (max-width: 1040px) {

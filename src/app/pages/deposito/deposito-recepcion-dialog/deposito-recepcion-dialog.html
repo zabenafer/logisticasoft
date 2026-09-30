@@ -1,0 +1,125 @@
+<div class="recepcion-dialog">
+  <header class="dialog-header">
+    <div>
+      <p class="eyebrow">Recepción de paquete</p>
+      <h2>Recepcionar envío existente</h2>
+      <p>Buscá el paquete por su número de seguimiento para registrar el ingreso físico.</p>
+    </div>
+
+    <button
+      mat-icon-button
+      type="button"
+      class="close-button"
+      aria-label="Cerrar"
+      (click)="cancelar()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <form class="search-form" (ngSubmit)="buscarEnvio()">
+    <mat-form-field appearance="outline">
+      <mat-label>Número de seguimiento</mat-label>
+      <input
+        matInput
+        name="numeroSeguimiento"
+        autocomplete="off"
+        [ngModel]="numeroSeguimiento()"
+        (ngModelChange)="onNumeroSeguimientoChange($event)"
+        [disabled]="buscando() || confirmando()"
+      />
+    </mat-form-field>
+
+    <button
+      mat-flat-button
+      class="search-button"
+      type="submit"
+      [disabled]="buscando() || confirmando() || !numeroSeguimiento().trim()"
+    >
+      <mat-icon>search</mat-icon>
+      {{ buscando() ? 'Buscando...' : 'Buscar envío' }}
+    </button>
+  </form>
+
+  <div class="message-card error-message" *ngIf="mensajeError()">
+    <mat-icon>info</mat-icon>
+    <span>{{ mensajeError() }}</span>
+  </div>
+
+  <div
+    class="missing-actions"
+    *ngIf="busquedaRealizada() && !envio() && mensajeError().startsWith('No encontramos')"
+  >
+    <button mat-stroked-button type="button" disabled>
+      Registrar nuevo envío
+      <span>Próximamente</span>
+    </button>
+  </div>
+
+  <section class="envio-summary" *ngIf="envio() as envio">
+    <div class="summary-heading">
+      <div>
+        <p class="eyebrow">Envío encontrado</p>
+        <h3>{{ envio.numeroSeguimiento }}</h3>
+      </div>
+
+      <span class="status-pill" [ngClass]="estadoClass(envio.estado)">
+        {{ envio.estado }}
+      </span>
+    </div>
+
+    <div class="summary-grid">
+      <div>
+        <span>Cliente</span>
+        <strong>{{ envio.cliente }}</strong>
+      </div>
+
+      <div>
+        <span>Transportista</span>
+        <strong>{{ envio.transportista }}</strong>
+      </div>
+
+      <div>
+        <span>Origen</span>
+        <strong>{{ envio.origen }}</strong>
+      </div>
+
+      <div>
+        <span>Destino</span>
+        <strong>{{ envio.destino }}</strong>
+      </div>
+
+      <div>
+        <span>Depósito actual</span>
+        <strong>{{ envio.depositoActual }}</strong>
+      </div>
+
+      <div>
+        <span>Última actualización</span>
+        <strong>{{ envio.ultimaActualizacion }}</strong>
+      </div>
+    </div>
+
+    <div class="message-card warning-message" *ngIf="mensajeBloqueo()">
+      <mat-icon>block</mat-icon>
+      <span>{{ mensajeBloqueo() }}</span>
+    </div>
+  </section>
+
+  <footer class="dialog-actions">
+    <button mat-button type="button" (click)="cancelar()" [disabled]="confirmando()">
+      Cancelar
+    </button>
+
+    <button
+      mat-flat-button
+      class="confirm-button"
+      type="button"
+      [disabled]="!puedeConfirmar() || confirmando()"
+      (click)="confirmarRecepcion()"
+    >
+      <mat-icon>inventory_2</mat-icon>
+      {{ confirmando() ? 'Confirmando...' : 'Confirmar recepción' }}
+    </button>
+  </footer>
+</div>

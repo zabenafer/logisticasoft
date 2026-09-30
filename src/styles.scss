@@ -87,6 +87,19 @@ body {
   }
 }
 
+.deposito-recepcion-dialog-panel {
+  .mat-mdc-dialog-container {
+    --mdc-dialog-container-shape: 24px;
+  }
+
+  .mat-mdc-dialog-surface,
+  .mdc-dialog__surface {
+    max-height: calc(100dvh - 32px);
+    border-radius: 24px !important;
+    overflow: hidden;
+  }
+}
+
 @media (max-width: 640px) {
   .cliente-envio-dialog-panel {
     max-width: 100vw !important;
@@ -111,6 +124,21 @@ body {
       border-radius: 0 !important;
       height: 100dvh;
       max-height: 100dvh;
+    }
+  }
+
+  .deposito-recepcion-dialog-panel {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+
+    .mat-mdc-dialog-surface,
+    .mdc-dialog__surface {
+      height: 100dvh;
+      max-height: 100dvh;
+      border-radius: 0 !important;
+      overflow: hidden;
     }
   }
 }

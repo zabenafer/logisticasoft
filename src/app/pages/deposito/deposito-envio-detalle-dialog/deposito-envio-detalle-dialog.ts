@@ -22,6 +22,8 @@ export class DepositoEnvioDetalleDialogComponent {
 
   estadoClass(estado: EstadoDepositoEnvio): string {
     switch (estado) {
+      case 'Pendiente de recepción en depósito':
+        return 'status-awaiting-reception';
       case 'Recibido en depósito':
         return 'status-received';
       case 'Pendiente de retiro':
